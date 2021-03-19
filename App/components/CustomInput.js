@@ -33,11 +33,22 @@ const styles = StyleSheet.create({
   },
 });
 
-export const CustomInput = ({ icon, placeholder }) => {
+export const CustomInput = ({
+  icon,
+  placeholder,
+  onTextChange,
+  secureTextEntry = false,
+}) => {
   return (
     <View style={styles.inputContainer}>
       <View style={styles.iconContainer}>{icon}</View>
-      <TextInput style={styles.input} placeholder={placeholder} />
+      <TextInput
+        autoCapitalize="none"
+        secureTextEntry={secureTextEntry}
+        onChangeText={(value) => onTextChange(value)}
+        style={styles.input}
+        placeholder={placeholder}
+      />
     </View>
   );
 };

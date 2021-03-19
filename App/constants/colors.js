@@ -5,9 +5,9 @@ export default {
   midBlue: "#1c9ffd",
   darkBlue: "#1778F2",
   border: "#bfbfbf",
+  darkBorder: "#a6a6a6",
   iconBackground: "#e6e6e6",
   text: "#1a1a1a",
-  // textLight: "#797979",
-  // offWhite: "#F0F0F0",
-  // boxShadow: "#000",
+  lightText: "#666666",
+  offWhite: "#F0F0F0",
 };

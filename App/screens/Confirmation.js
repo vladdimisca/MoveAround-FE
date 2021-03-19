@@ -9,7 +9,7 @@ import {
 } from "react-native-confirmation-code-field";
 
 // constants
-import colors from "../../constants/colors";
+import colors from "../constants/colors";
 
 const styles = StyleSheet.create({
   container: {

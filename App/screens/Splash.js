@@ -6,6 +6,12 @@ import { CommonActions, useFocusEffect } from "@react-navigation/native";
 // constants
 import colors from "../constants/colors";
 
+// storage
+import { UserStorage } from "../util/storage/UserStorage";
+
+// util
+import { Util } from "../util/Util";
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -22,16 +28,37 @@ const styles = StyleSheet.create({
 
 export default ({ navigation }) => {
   useFocusEffect(() => {
-    const timeout = setTimeout(() => {
+    const fetchData = async () => {
+      const user = await Util.getCurrentUser();
+
+      if (user !== null) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: "App",
+                state: {
+                  routes: [{ name: "Profile" }],
+                },
+              },
+            ],
+          })
+        );
+        return;
+      }
+
+      // clear the storage
+      await UserStorage.clearStorage();
       navigation.dispatch(
         CommonActions.reset({
-          index: 1,
-          routes: [{ name: "UserRolesOptions" }],
+          index: 0,
+          routes: [{ name: "Login" }],
         })
       );
-    }, 1000);
+    };
 
-    return () => clearTimeout(timeout);
+    fetchData();
   });
 
   return (
