@@ -73,17 +73,6 @@ export default ({ navigation }) => {
   const [lastName, setLastName] = useState("");
   const [countryCode, setCountryCode] = useState("RO");
 
-  const trimInputs = () => {
-    setCallingCode(callingCode.trim());
-    setPhoneNumber(phoneNumber.trim());
-    setPassword(password.trim());
-    setRepeatPass(repeatPass.trim());
-    setEmail(email.trim());
-    setFirstName(firstName.trim());
-    setLastName(lastName.trim());
-    setCountryCode(countryCode.trim());
-  };
-
   const signUp = async () => {
     if (isLoading === true) {
       return;
@@ -94,7 +83,6 @@ export default ({ navigation }) => {
     }
     setError("");
     setIsLoading(true);
-    trimInputs();
 
     try {
       await UserService.register({

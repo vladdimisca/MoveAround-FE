@@ -94,22 +94,56 @@ export default ({ navigation }) => {
         await getAllCountries()
           .then(
             (countries) =>
-              countries.find(
-                (c) =>
-                  c.callingCode.includes(currentUser.callingCode.substring(1)) // remove the "+" from the calling code
+              countries.find((c) =>
+                c.callingCode.includes(currentUser.callingCode)
               ).cca2
           )
           .then((cca2) => setCountryCode(cca2));
         setIsScreenLoading(false);
       } else {
-        console.log("Mgg");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            key: null,
+            routes: [
+              {
+                name: "Authentication",
+                state: {
+                  routes: [{ name: "Login" }],
+                },
+              },
+            ],
+          })
+        );
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigation]);
+
+  const redirectToProfile = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        key: null,
+        routes: [
+          {
+            name: "App",
+            state: {
+              routes: [{ name: "Profile" }],
+            },
+          },
+        ],
+      })
+    );
+  };
 
   const updateProfilePicture = async () => {
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -119,12 +153,13 @@ export default ({ navigation }) => {
     });
     const { token, userId } = await UserStorage.retrieveUserIdAndToken();
     await UserService.updateProfilePictureById(userId, token, result.base64)
-      .then((response) =>
+      .then((response) => {
         setUser((value) => {
           return { ...value, profilePictureURL: response.profilePictureURL };
-        })
-      )
-      .catch((err) => console.log(err.response.request._response));
+        });
+        redirectToProfile();
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const updateUser = async () => {
@@ -134,6 +169,7 @@ export default ({ navigation }) => {
     UserService.updateUserById(userId, token, user)
       .then((updatedUser) => {
         setUser(updatedUser);
+        redirectToProfile();
       })
       .catch((err) => {
         if (
@@ -172,18 +208,49 @@ export default ({ navigation }) => {
   };
 
   const deleteAccount = async () => {
-    Alert.alert("Do you want to delete your account?", null, [
-      {
-        text: "Yes",
-        onPress: async () => {
-          UserService.deleteAccount().then(() => signOut());
+    Alert.alert(
+      "Do you want to delete your account?",
+      "This action is not reversible!",
+      [
+        {
+          text: "Yes",
+          onPress: async () => {
+            setIsLoading(true);
+            const {
+              token,
+              userId,
+            } = await UserStorage.retrieveUserIdAndToken();
+            UserService.deleteAccount(userId, token)
+              .then(() => signOut())
+              .catch(() => {
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    key: null,
+                    routes: [
+                      {
+                        name: "Authentication",
+                        state: {
+                          routes: [{ name: "Login" }],
+                        },
+                      },
+                    ],
+                  })
+                );
+              })
+              .finally(() => setIsLoading(false));
+          },
         },
-      },
-      {
-        text: "No",
-        style: "cancel",
-      },
-    ]);
+        {
+          text: "No",
+          style: "cancel",
+        },
+      ]
+    );
+  };
+
+  const changePassword = () => {
+    navigation.push("ChangePassword");
   };
 
   return (
@@ -224,7 +291,6 @@ export default ({ navigation }) => {
             </View>
 
             <Input
-              autoCapitalize="none"
               leftIcon={
                 <Icon name="user" size={24} color={colors.darkBorder} />
               }
@@ -240,7 +306,6 @@ export default ({ navigation }) => {
               }
             />
             <Input
-              autoCapitalize="none"
               leftIcon={
                 <Icon name="user" size={24} color={colors.darkBorder} />
               }
@@ -342,10 +407,11 @@ export default ({ navigation }) => {
 
               <ItemSeparator />
 
-              <TouchableOpacity activeOpacity={0.6}>
-                <Text activeOpacity={0.6} style={styles.actionText}>
-                  Change password
-                </Text>
+              <TouchableOpacity
+                onPress={() => changePassword()}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.actionText}>Change password</Text>
               </TouchableOpacity>
 
               <ItemSeparator />

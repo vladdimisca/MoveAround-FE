@@ -16,6 +16,7 @@ import {
   Feather,
   Ionicons,
 } from "react-native-vector-icons";
+import { CommonActions } from "@react-navigation/routers";
 
 // constants
 import colors from "../constants/colors";
@@ -93,12 +94,25 @@ export default ({ navigation }) => {
         setCurrentUser(user);
         setIsProfileLoading(false);
       } else {
-        console.log("Mgg");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            key: null,
+            routes: [
+              {
+                name: "Authentication",
+                state: {
+                  routes: [{ name: "Login" }],
+                },
+              },
+            ],
+          })
+        );
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigation]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -167,7 +181,16 @@ export default ({ navigation }) => {
                     color={colors.darkBorder}
                   />
                 ) : (
-                  <Text style={styles.verifyText}>Verify</Text>
+                  <Text
+                    onPress={() =>
+                      navigation.push("Confirmation", {
+                        email: currentUser.email,
+                      })
+                    }
+                    style={styles.verifyText}
+                  >
+                    Verify
+                  </Text>
                 )
               }
               text={currentUser.email}
@@ -193,7 +216,7 @@ export default ({ navigation }) => {
                   )}
                 </TouchableOpacity>
               }
-              text={`${currentUser.callingCode} ${currentUser.phoneNumber}`}
+              text={`+${currentUser.callingCode} ${currentUser.phoneNumber}`}
             />
 
             <GeneralButton

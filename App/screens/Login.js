@@ -74,17 +74,10 @@ export default ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // input fields
-  const [callingCode, setCallingCode] = useState("+40");
+  const [callingCode, setCallingCode] = useState("40");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [countryCode, setCountryCode] = useState("RO");
-
-  const trimInputs = () => {
-    setCallingCode(callingCode.trim());
-    setPhoneNumber(phoneNumber.trim());
-    setPassword(password.trim());
-    setCountryCode(countryCode.trim());
-  };
 
   const login = async () => {
     if (isLoading === true) {
@@ -92,7 +85,6 @@ export default ({ navigation }) => {
     }
     setError("");
     setIsLoading(true);
-    trimInputs();
 
     try {
       const { user, token } = await UserService.login(

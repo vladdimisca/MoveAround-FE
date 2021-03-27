@@ -1,15 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, SafeAreaView, StatusBar, View, Text } from "react-native";
-
+import { CommonActions } from "@react-navigation/routers";
 import {
   CodeField,
   Cursor,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import Spinner from "react-native-loading-spinner-overlay";
+import { DotIndicator } from "react-native-indicators";
 
 // constants
 import colors from "../constants/colors";
+
+// components
+import { GeneralButton } from "../components/GeneralButton";
+
+// services
+import { UserService } from "../services/UserService";
+
+// storage
+import { UserStorage } from "../util/storage/UserStorage";
 
 const styles = StyleSheet.create({
   container: {
@@ -17,10 +29,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   text: {
-    fontSize: 18,
+    fontSize: 22,
     marginHorizontal: 30,
     marginBottom: 20,
     color: colors.text,
+    alignSelf: "center",
   },
   input: {
     marginHorizontal: 20,
@@ -31,6 +44,7 @@ const styles = StyleSheet.create({
   title: { textAlign: "center", fontSize: 30 },
   codeFieldRoot: {
     marginTop: 20,
+    marginBottom: 30,
     width: 280,
     marginLeft: "auto",
     marginRight: "auto",
@@ -52,11 +66,28 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.midBlue,
     borderBottomWidth: 2,
   },
+  errorText: {
+    marginHorizontal: 25,
+    color: "red",
+    fontSize: 16,
+    alignSelf: "center",
+  },
+  actionText: {
+    alignSelf: "center",
+    fontSize: 18,
+    color: colors.lightBlue,
+    marginVertical: 10,
+  },
 });
 
 const CELL_COUNT = 4;
 
-export default () => {
+export default ({ route, navigation }) => {
+  const [to, setTo] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // input
   const [value, setValue] = useState("");
   const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -64,11 +95,42 @@ export default () => {
     setValue,
   });
 
+  useEffect(() => {
+    if (!route.params || (!route.params.email && !route.params.phone)) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          key: null,
+          routes: [
+            {
+              name: "App",
+              state: {
+                routes: [{ name: "Profile" }],
+              },
+            },
+          ],
+        })
+      );
+      return;
+    }
+    if (route.params.email) {
+      setTo(route.params.email);
+    } else {
+      setTo(route.params.phone);
+    }
+  }, [route, navigation]);
+
   return (
     <View style={{ flex: 1 }}>
+      <Spinner
+        customIndicator={
+          <DotIndicator color={colors.midBlue} count={3} size={12} />
+        }
+        visible={isLoading}
+      />
       <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
       <SafeAreaView style={styles.container}>
-        <Text style={styles.text}>Enter the code sent to 0769 481 003</Text>
+        <Text style={styles.text}>{`Enter the code sent to\n${to}`}</Text>
         <CodeField
           ref={ref}
           {...props}
@@ -90,6 +152,80 @@ export default () => {
             </View>
           )}
         />
+        {isLoading === false && error !== "" && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+        <GeneralButton
+          onPress={async () => {
+            if (isLoading === true) {
+              return;
+            }
+            setIsLoading(true);
+
+            if (route.params.email) {
+              const {
+                token,
+                userId,
+              } = await UserStorage.retrieveUserIdAndToken();
+              await UserService.activateEmail(userId, token, value)
+                .then(() => {
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 0,
+                      key: null,
+                      routes: [
+                        {
+                          name: "App",
+                          state: {
+                            routes: [{ name: "Profile" }],
+                          },
+                        },
+                      ],
+                    })
+                  );
+                })
+                .catch((err) => {
+                  if (
+                    err &&
+                    err.response &&
+                    err.response.request &&
+                    err.response.request._response
+                  ) {
+                    setError(
+                      `${
+                        JSON.parse(err.response.request._response).errorMessage
+                      }`
+                    );
+                  } else {
+                    setError("Oops, something went wrong!");
+                  }
+                })
+                .finally(() => setIsLoading(false));
+            } else {
+              // send to route.params.phone
+            }
+          }}
+          text="Confirm"
+        />
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={async () => {
+            if (isLoading === true) {
+              return;
+            }
+            setIsLoading(true);
+
+            const {
+              token,
+              userId,
+            } = await UserStorage.retrieveUserIdAndToken();
+            await UserService.resendEmailCode(userId, token).finally(() =>
+              setIsLoading(false)
+            );
+          }}
+        >
+          <Text style={styles.actionText}>Resend code</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </View>
   );

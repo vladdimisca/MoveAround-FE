@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Dimensions,
-  Image,
-} from "react-native";
+import { StyleSheet, TouchableOpacity, Text, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 // constants
@@ -38,12 +32,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export const RoleButton = ({
-  text,
-  imageSource,
-  buttonContainerStyle,
-  onPress,
-}) => {
+export const TravelOption = ({ text, buttonContainerStyle, onPress }) => {
   let buttonContainer = styles.buttonContainer;
 
   if (buttonContainerStyle) {
@@ -60,7 +49,6 @@ export const RoleButton = ({
         style={styles.imageContainer}
         colors={[colors.lightBlue, colors.midBlue, colors.darkBlue]}
       >
-        <Image source={imageSource} style={styles.image} resizeMode="contain" />
         <Text style={styles.text}>{text}</Text>
       </LinearGradient>
     </TouchableOpacity>

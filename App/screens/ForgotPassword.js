@@ -50,10 +50,6 @@ export default () => {
   // input fields
   const [email, setEmail] = useState("");
 
-  const trimInputs = () => {
-    setEmail(email.trim());
-  };
-
   const recoverAccount = async () => {
     if (isLoading === true) {
       return;
@@ -65,7 +61,6 @@ export default () => {
     setError("");
     setSuccess("");
     setIsLoading(true);
-    trimInputs();
 
     await UserService.recoverAccount(email)
       .then((response) => setSuccess(response))
