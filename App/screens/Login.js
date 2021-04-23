@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  View,
-  Text,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, SafeAreaView, View, Text, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CountryPicker from "react-native-country-picker-modal";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -20,6 +13,7 @@ import colors from "../constants/colors";
 // custom components
 import { CustomInput } from "../components/CustomInput";
 import { NextButton } from "../components/NextButton";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // services
 import { UserService } from "../services/UserService";
@@ -132,12 +126,16 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Sign in to your account</Text>
         <ScrollView>
           <View>
             <CustomInput
+              keyboardType="numeric"
               placeholder="Phone number..."
               onTextChange={(phone) => setPhoneNumber(phone)}
               icon={
@@ -158,6 +156,7 @@ export default ({ navigation }) => {
               }
             />
             <CustomInput
+              autoCapitalize="none"
               secureTextEntry
               placeholder="Password..."
               onTextChange={(pass) => setPassword(pass)}

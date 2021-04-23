@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, StatusBar, SafeAreaView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  Text,
+  ScrollView,
+  LogBox,
+} from "react-native";
 import { Input } from "react-native-elements";
-import RNPickerSelect from "react-native-picker-select";
-// import MonthPicker from "react-native-month-year-picker";
-
+import { CommonActions } from "@react-navigation/native";
+import { DotIndicator } from "react-native-indicators";
+import Spinner from "react-native-loading-spinner-overlay";
+import NativeColorPicker from "native-color-picker";
 // constants
 import colors from "../constants/colors";
+
+// components
+import { GeneralButton } from "../components/GeneralButton";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
+
+// services
+import { CarService } from "../services/CarService";
+
+// storage
+import { UserStorage } from "../util/storage/UserStorage";
 
 const styles = StyleSheet.create({
   container: {
@@ -14,6 +32,7 @@ const styles = StyleSheet.create({
   },
   safeAreaContainer: {
     flex: 1,
+    marginTop: 25,
   },
   labelStyle: {
     color: colors.text,
@@ -23,81 +42,227 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     paddingHorizontal: 10,
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputAndroid: {
-    fontSize: 18,
+  errorText: {
     marginHorizontal: 25,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.text,
-    color: colors.text,
-    paddingRight: 30,
+    color: "red",
+    fontSize: 16,
+    alignSelf: "center",
   },
 });
 
-export default () => {
-  // input fields
-  const [licensePlate, setLicensePlate] = useState("");
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
-  const [color, setColor] = useState("");
-  const [year, setYear] = useState(new Date());
+// ignore warning logs from NativeColorPicker dependency
+LogBox.ignoreLogs([
+  "VirtualizedLists should never be nested inside plain ScrollViews",
+  "Animated: `useNativeDriver` was not specified",
+]);
 
-  useEffect(() => {});
+export default ({ navigation, route }) => {
+  const carColors = [
+    "black",
+    "white",
+    "grey",
+    "red",
+    "blue",
+    "green",
+    "brown",
+    "beige",
+    "orange",
+    "yellow",
+    "pink",
+    "darkblue",
+  ];
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchingCar, setFetchingCar] = useState(true);
+  const [car, setCar] = useState({
+    id: null,
+    licensePlate: "",
+    make: "",
+    model: "",
+    color: "black",
+    year: "",
+  });
+
+  useEffect(() => {
+    const fetchCar = async () => {
+      if (route.params && route.params.carId) {
+        setFetchingCar(true);
+        navigation.setOptions({ title: "Update your car" });
+        setCar((value) => {
+          return { ...value, carId: route.params.carId };
+        });
+
+        const { token } = await UserStorage.retrieveUserIdAndToken();
+        CarService.getCarById(route.params.carId, token)
+          .then((c) => setCar({ ...c, year: c.year.toString() }))
+          .finally(() => setFetchingCar(false));
+      } else {
+        setFetchingCar(false);
+      }
+    };
+
+    fetchCar();
+  }, [route, navigation]);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.offWhite} />
+      <Spinner
+        overlayColor={colors.white}
+        customIndicator={
+          <DotIndicator color={colors.midBlue} count={3} size={12} />
+        }
+        visible={fetchingCar}
+      />
+      <Spinner
+        customIndicator={
+          <DotIndicator color={colors.midBlue} count={3} size={12} />
+        }
+        visible={isLoading}
+      />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView style={styles.safeAreaContainer}>
-        <Input
-          autoCapitalize="none"
-          label="License Plate"
-          labelStyle={styles.labelStyle}
-          inputContainerStyle={styles.inputContainerStyle}
-          value={licensePlate}
-          onChangeText={(licPlate) => setLicensePlate(licPlate)}
-        />
+        <ScrollView>
+          <Input
+            placeholder="Enter the license plate..."
+            autoCapitalize="none"
+            label="License Plate"
+            labelStyle={styles.labelStyle}
+            inputContainerStyle={styles.inputContainerStyle}
+            value={car.licensePlate}
+            onChangeText={(licensePlate) =>
+              setCar((value) => {
+                return { ...value, licensePlate };
+              })
+            }
+          />
 
-        <Input
-          label="Make"
-          labelStyle={styles.labelStyle}
-          inputContainerStyle={styles.inputContainerStyle}
-          value={make}
-          onChangeText={(mk) => setMake(mk)}
-        />
+          <Input
+            placeholder="Enter the make..."
+            label="Make"
+            labelStyle={styles.labelStyle}
+            inputContainerStyle={styles.inputContainerStyle}
+            value={car.make}
+            onChangeText={(make) =>
+              setCar((value) => {
+                return { ...value, make };
+              })
+            }
+          />
 
-        <Input
-          label="Model"
-          labelStyle={styles.labelStyle}
-          inputContainerStyle={styles.inputContainerStyle}
-          value={model}
-          onChangeText={(md) => setModel(md)}
-        />
+          <Input
+            placeholder="Enter the model..."
+            label="Model"
+            labelStyle={styles.labelStyle}
+            inputContainerStyle={styles.inputContainerStyle}
+            value={car.model}
+            onChangeText={(model) =>
+              setCar((value) => {
+                return { ...value, model };
+              })
+            }
+          />
 
-        <RNPickerSelect
-          style={{ ...pickerSelectStyles }}
-          onValueChange={(value) => setColor(value)}
-          useNativeAndroidPickerStyle={false}
-          placeholder={{
-            label: "Select the color of your car...",
-            value: null,
-          }}
-          items={[
-            { label: "black", value: "black" },
-            { label: "blue", value: "blue" },
-            { label: "red", value: "red" },
-          ]}
-        />
-        {/* <MonthPicker
-          onChange={(_, yr) => setYear(yr)}
-          value={year}
-          minimumDate={new Date(1995, 1)}
-          maximumDate={new Date()}
-          locale="ko"
-        /> */}
+          <Input
+            keyboardType="numeric"
+            label="Year"
+            placeholder="Enter the year..."
+            labelStyle={styles.labelStyle}
+            inputContainerStyle={styles.inputContainerStyle}
+            value={car.year}
+            onChangeText={(year) =>
+              setCar((value) => {
+                return { ...value, year };
+              })
+            }
+          />
+
+          <Text
+            style={{
+              marginBottom: 15,
+              marginHorizontal: 25,
+              fontSize: 17,
+              fontWeight: "bold",
+            }}
+          >
+            Select the color of your car
+          </Text>
+
+          <NativeColorPicker
+            style={{ alignSelf: "center", marginBottom: 15 }}
+            itemSize={34}
+            columns={6}
+            shadow
+            sort
+            colors={carColors}
+            selectedColor={car.color}
+            onSelect={(color) =>
+              setCar((value) => {
+                return { ...value, color };
+              })
+            }
+          />
+
+          {isLoading === false && error !== "" && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
+
+          <GeneralButton
+            text={car.id === null ? "Add car" : "Update car"}
+            onPress={async () => {
+              if (isLoading === true) {
+                return;
+              }
+              setError("");
+              setIsLoading(true);
+
+              const { token } = await UserStorage.retrieveUserIdAndToken();
+
+              const payload = { ...car, year: parseInt(car.year, 10) };
+              const response =
+                car.id === null
+                  ? delete payload.id && CarService.createCar(payload, token)
+                  : CarService.updateCarById(car.id, payload, token);
+
+              response
+                .then(() => {
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 0,
+                      key: null,
+                      routes: [
+                        {
+                          name: "App",
+                          state: {
+                            routes: [{ name: "Cars" }],
+                          },
+                        },
+                      ],
+                    })
+                  );
+                })
+                .catch((err) => {
+                  if (
+                    err &&
+                    err.response &&
+                    err.response.request &&
+                    err.response.request._response
+                  ) {
+                    setError(
+                      `${
+                        JSON.parse(err.response.request._response).errorMessage
+                      }`
+                    );
+                  } else {
+                    setError("Oops, something went wrong!");
+                  }
+                })
+                .finally(() => setIsLoading(false));
+            }}
+          />
+        </ScrollView>
       </SafeAreaView>
     </View>
   );

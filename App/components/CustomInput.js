@@ -37,13 +37,16 @@ export const CustomInput = ({
   icon,
   placeholder,
   onTextChange,
+  keyboardType = "default",
+  autoCapitalize = "words",
   secureTextEntry = false,
 }) => {
   return (
     <View style={styles.inputContainer}>
       <View style={styles.iconContainer}>{icon}</View>
       <TextInput
-        autoCapitalize="none"
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize}
         secureTextEntry={secureTextEntry}
         onChangeText={(value) => onTextChange(value)}
         style={styles.input}

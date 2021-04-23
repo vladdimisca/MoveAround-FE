@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-wrap-multilines */
 import React, { useState } from "react";
-import { View, StyleSheet, StatusBar, SafeAreaView, Text } from "react-native";
+import { View, StyleSheet, SafeAreaView, Text } from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
 import { Input } from "react-native-elements";
@@ -10,6 +10,7 @@ import { CommonActions } from "@react-navigation/native";
 
 // components
 import { GeneralButton } from "../components/GeneralButton";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // constants
 import colors from "../constants/colors";
@@ -59,7 +60,10 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView>
         <ScrollView>
           <Text style={styles.text}>Change your password</Text>

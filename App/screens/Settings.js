@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   SafeAreaView,
-  StatusBar,
   View,
   Dimensions,
   Text,
@@ -26,6 +25,7 @@ import colors from "../constants/colors";
 // components
 import { GeneralButton } from "../components/GeneralButton";
 import { ItemSeparator } from "../components/ProfileItem";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // util
 import { Util } from "../util/Util";
@@ -261,7 +261,10 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       {isScreenLoading ? (
         <View style={styles.dotIndicatorContainer}>
           <DotIndicator color={colors.midBlue} count={3} />

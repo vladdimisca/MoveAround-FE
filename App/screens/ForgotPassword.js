@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  View,
-  Text,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, SafeAreaView, View, Text, ScrollView } from "react-native";
 import { Fontisto } from "@expo/vector-icons";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -17,6 +10,7 @@ import colors from "../constants/colors";
 // custom components
 import { CustomInput } from "../components/CustomInput";
 import { GeneralButton } from "../components/GeneralButton";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // services
 import { UserService } from "../services/UserService";
@@ -89,12 +83,16 @@ export default () => {
         }
         visible={isLoading}
       />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Recover your account</Text>
         <ScrollView>
           <View>
             <CustomInput
+              autoCapitalize="none"
               placeholder="Enter your email..."
               onTextChange={(em) => setEmail(em)}
               icon={<Fontisto name="email" size={28} color={colors.text} />}

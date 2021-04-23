@@ -133,7 +133,7 @@ const CarsStackScreen = () => (
     <CarsStack.Screen
       name="AddCar"
       component={AddCar}
-      options={emptyHeaderOptions}
+      options={{ ...headerOptions, title: "Add a new car" }}
     />
   </CarsStack.Navigator>
 );

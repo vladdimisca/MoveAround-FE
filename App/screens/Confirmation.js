@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, SafeAreaView, StatusBar, View, Text } from "react-native";
+import { StyleSheet, SafeAreaView, View, Text } from "react-native";
 import { CommonActions } from "@react-navigation/routers";
 import {
   CodeField,
@@ -16,6 +16,7 @@ import colors from "../constants/colors";
 
 // components
 import { GeneralButton } from "../components/GeneralButton";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // services
 import { UserService } from "../services/UserService";
@@ -128,7 +129,10 @@ export default ({ route, navigation }) => {
         }
         visible={isLoading}
       />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>{`Enter the code sent to\n${to}`}</Text>
         <CodeField

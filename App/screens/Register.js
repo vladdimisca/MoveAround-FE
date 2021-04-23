@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, SafeAreaView, StatusBar, View, Text } from "react-native";
+import { StyleSheet, SafeAreaView, View, Text } from "react-native";
 import {
   FontAwesome,
   Fontisto,
@@ -17,6 +17,7 @@ import colors from "../constants/colors";
 // custom components
 import { CustomInput } from "../components/CustomInput";
 import { NextButton } from "../components/NextButton";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // services
 import { UserService } from "../services/UserService";
@@ -123,12 +124,16 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Create an account</Text>
         <ScrollView>
           <View>
             <CustomInput
+              keyboardType="numeric"
               onTextChange={(phone) => setPhoneNumber(phone)}
               placeholder="Phone number..."
               icon={
@@ -159,11 +164,13 @@ export default ({ navigation }) => {
               icon={<FontAwesome name="user-o" size={28} color={colors.text} />}
             />
             <CustomInput
+              autoCapitalize="none"
               onTextChange={(em) => setEmail(em)}
               placeholder="Email..."
               icon={<Fontisto name="email" size={28} color={colors.text} />}
             />
             <CustomInput
+              autoCapitalize="none"
               secureTextEntry
               onTextChange={(pass) => setPassword(pass)}
               placeholder="Password..."
@@ -177,6 +184,7 @@ export default ({ navigation }) => {
               }
             />
             <CustomInput
+              autoCapitalize="none"
               secureTextEntry
               onTextChange={(pass) => setRepeatPass(pass)}
               placeholder="Repeat Password..."

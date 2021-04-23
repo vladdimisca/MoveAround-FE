@@ -1,10 +1,13 @@
 import React from "react";
-import { StyleSheet, Text, StatusBar } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { CommonActions, useFocusEffect } from "@react-navigation/native";
 
 // constants
 import colors from "../constants/colors";
+
+// components
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // storage
 import { UserStorage } from "../util/storage/UserStorage";
@@ -63,7 +66,10 @@ export default ({ navigation }) => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={colors.midBlue} />
+      <FocusAwareStatusBar
+        barStyle="light-content"
+        backgroundColor={colors.midBlue}
+      />
       <LinearGradient
         style={styles.container}
         colors={[colors.midBlue, colors.darkBlue]}

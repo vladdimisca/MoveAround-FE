@@ -1,26 +1,45 @@
 import React from "react";
 import MapView from "react-native-maps";
-import { View, StyleSheet, Dimensions, StatusBar } from "react-native";
+import { View, StyleSheet, SafeAreaView } from "react-native";
 
-const screen = Dimensions.get("window");
+// google autocomplete
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+
+// components
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    height: "100%",
   },
   map: {
-    width: screen.width,
-    height: screen.height,
+    width: "100%",
+    height: "100%",
+    position: "absolute",
   },
 });
 
 export default () => {
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="transparent" />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
       <MapView style={styles.map} />
+      <SafeAreaView>
+        <GooglePlacesAutocomplete
+          placeholder="From"
+          onPress={(data, details = null) => {
+            console.log(data, details);
+          }}
+          query={{
+            key: "AIzaSyCNEB7mPzNKjxHe98IZXeFO7UptYcoiJJ0",
+            language: "en",
+          }}
+        />
+      </SafeAreaView>
     </View>
   );
 };

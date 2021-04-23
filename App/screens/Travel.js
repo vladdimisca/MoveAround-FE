@@ -1,11 +1,12 @@
 import React from "react";
-import { StyleSheet, View, StatusBar, SafeAreaView } from "react-native";
+import { StyleSheet, View, SafeAreaView } from "react-native";
 
 // constants
 import colors from "../constants/colors";
 
 // custom components
 import { TravelOption } from "../components/TravelOption";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 const styles = StyleSheet.create({
   container: {
@@ -22,7 +23,10 @@ const styles = StyleSheet.create({
 export default ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.white}
+      />
       <SafeAreaView style={styles.safeAreaContainer}>
         <TravelOption onPress={() => navigation.push("Offer")} text="Offer" />
         <TravelOption

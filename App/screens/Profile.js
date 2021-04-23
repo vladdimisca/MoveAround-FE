@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  StatusBar,
-  SafeAreaView,
-  Dimensions,
-  Text,
-} from "react-native";
+import { StyleSheet, View, SafeAreaView, Dimensions, Text } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { DotIndicator } from "react-native-indicators";
 import { Avatar } from "react-native-elements";
@@ -24,6 +17,7 @@ import colors from "../constants/colors";
 // components
 import { GeneralButton } from "../components/GeneralButton";
 import { ProfileItem, ItemSeparator } from "../components/ProfileItem";
+import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // util
 import { Util } from "../util/Util";
@@ -116,7 +110,10 @@ export default ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.offWhite} />
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.offWhite}
+      />
       {isProfileLoading ? (
         <View style={styles.dotIndicatorContainer}>
           <DotIndicator color={colors.midBlue} count={3} />
