@@ -74,6 +74,7 @@ export default ({ navigation }) => {
 
   useEffect(() => {
     const fetchCars = async () => {
+      setIsLoading(true);
       const { userId, token } = await UserStorage.retrieveUserIdAndToken();
 
       CarService.getAllCarsByUserId(userId, token)

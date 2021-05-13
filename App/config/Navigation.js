@@ -4,7 +4,11 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { MaterialIcons, FontAwesome5 } from "react-native-vector-icons";
+import {
+  MaterialIcons,
+  FontAwesome5,
+  Octicons,
+} from "react-native-vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 // constants
@@ -21,22 +25,20 @@ import Cars from "../screens/Cars";
 import ForgotPassword from "../screens/ForgotPassword";
 import ChangePassword from "../screens/ChangePassword";
 import Travel from "../screens/Travel";
-import Offer from "../screens/Offer";
+import ProvideRoute from "../screens/ProvideRoute";
 import AddCar from "../screens/AddCar";
+import CompleteRoute from "../screens/CompleteRoute";
+import Routes from "../screens/Routes";
+import RouteDateFilter from "../screens/RouteDateFilter";
+import FilteredRoutes from "../screens/FilteredRoutes";
+import ViewRoute from "../screens/ViewRoute";
+import Requests from "../screens/Requests";
 
 const emptyHeaderOptions = {
   title: null,
   headerStyle: {
     backgroundColor: colors.white,
     elevation: 0,
-  },
-};
-
-const transparentHeaderOptions = {
-  title: null,
-  headerTransparent: true,
-  headerStyle: {
-    backgroundColor: "transparent",
   },
 };
 
@@ -138,6 +140,78 @@ const CarsStackScreen = () => (
   </CarsStack.Navigator>
 );
 
+const RoutesStack = createStackNavigator();
+const RoutesStackScreen = () => (
+  <RoutesStack.Navigator initialRouteName="Routes">
+    <RoutesStack.Screen
+      name="Routes"
+      component={Routes}
+      options={{ ...headerOptions, title: "Routes" }}
+    />
+    <RoutesStack.Screen
+      name="Profile"
+      component={Profile}
+      options={{ headerShown: false }}
+    />
+    <RoutesStack.Screen
+      name="Settings"
+      component={Settings}
+      options={headerOptions}
+    />
+    <RoutesStack.Screen
+      name="Confirmation"
+      component={Confirmation}
+      options={emptyHeaderOptions}
+    />
+    <RoutesStack.Screen
+      name="ChangePassword"
+      component={ChangePassword}
+      options={emptyHeaderOptions}
+    />
+    <RoutesStack.Screen
+      name="ViewRoute"
+      component={ViewRoute}
+      options={{ ...headerOptions, title: "View route details" }}
+    />
+  </RoutesStack.Navigator>
+);
+
+const RequestsStack = createStackNavigator();
+const RequestsStackScreen = () => (
+  <RequestsStack.Navigator initialRouteName="Requests">
+    <RequestsStack.Screen
+      name="Requests"
+      component={Requests}
+      options={{ ...headerOptions, title: "Requests" }}
+    />
+    <RequestsStack.Screen
+      name="Profile"
+      component={Profile}
+      options={{ headerShown: false }}
+    />
+    <RequestsStack.Screen
+      name="Settings"
+      component={Settings}
+      options={headerOptions}
+    />
+    <RequestsStack.Screen
+      name="Confirmation"
+      component={Confirmation}
+      options={emptyHeaderOptions}
+    />
+    <RequestsStack.Screen
+      name="ChangePassword"
+      component={ChangePassword}
+      options={emptyHeaderOptions}
+    />
+    <RequestsStack.Screen
+      name="ViewRoute"
+      component={ViewRoute}
+      options={{ ...headerOptions, title: "View route details" }}
+    />
+  </RequestsStack.Navigator>
+);
+
 const TravelStack = createStackNavigator();
 const TravelStackScreen = () => (
   <TravelStack.Navigator initialRouteName="Travel">
@@ -147,9 +221,34 @@ const TravelStackScreen = () => (
       options={{ headerShown: false }}
     />
     <TravelStack.Screen
-      name="Offer"
-      component={Offer}
-      options={transparentHeaderOptions}
+      name="ProvideRoute"
+      component={ProvideRoute}
+      options={{ ...headerOptions, title: "Provide a route" }}
+    />
+    <TravelStack.Screen
+      name="CompleteRoute"
+      component={CompleteRoute}
+      options={{ ...headerOptions, title: "Complete route details" }}
+    />
+    <TravelStack.Screen
+      name="RouteDateFilter"
+      component={RouteDateFilter}
+      options={{ ...headerOptions, title: "Complete route details" }}
+    />
+    <TravelStack.Screen
+      name="FilteredRoutes"
+      component={FilteredRoutes}
+      options={{ ...headerOptions, title: "Matching routes" }}
+    />
+    <TravelStack.Screen
+      name="Profile"
+      component={Profile}
+      options={{ headerShown: false }}
+    />
+    <TravelStack.Screen
+      name="ViewRoute"
+      component={ViewRoute}
+      options={{ ...headerOptions, title: "View route details" }}
     />
   </TravelStack.Navigator>
 );
@@ -158,6 +257,28 @@ const Tabs = createBottomTabNavigator();
 const TabsScreen = () => {
   return (
     <Tabs.Navigator tabBarOptions={tabBarOptions}>
+      <Tabs.Screen
+        name="Requests"
+        component={RequestsStackScreen}
+        options={{
+          tabBarIcon: (props) => (
+            <Octicons
+              name="request-changes"
+              size={props.size}
+              color={props.color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Routes"
+        component={RoutesStackScreen}
+        options={{
+          tabBarIcon: (props) => (
+            <FontAwesome5 name="route" size={props.size} color={props.color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="Travel"
         component={TravelStackScreen}

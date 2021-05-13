@@ -19,12 +19,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export const GeneralButton = ({ text, onPress }) => {
+export const GeneralButton = ({ text, onPress, isActive = false }) => {
   return (
     <TouchableOpacity
+      disabled={isActive}
       activeOpacity={0.7}
       onPress={onPress}
-      style={styles.buttonStyle}
+      style={{ ...styles.buttonStyle, opacity: isActive ? 0.7 : 1 }}
     >
       <Text style={styles.textStyle}>{text}</Text>
     </TouchableOpacity>

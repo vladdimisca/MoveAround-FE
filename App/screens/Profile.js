@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, SafeAreaView, Dimensions, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  Dimensions,
+  Text,
+  Linking,
+} from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { DotIndicator } from "react-native-indicators";
 import { Avatar } from "react-native-elements";
@@ -10,6 +17,7 @@ import {
   Ionicons,
 } from "react-native-vector-icons";
 import { CommonActions } from "@react-navigation/routers";
+import moment from "moment";
 
 // constants
 import colors from "../constants/colors";
@@ -21,6 +29,12 @@ import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 
 // util
 import { Util } from "../util/Util";
+
+// storage
+import { UserStorage } from "../util/storage/UserStorage";
+
+// services
+import { UserService } from "../services/UserService";
 
 const screen = Dimensions.get("window");
 const styles = StyleSheet.create({
@@ -72,9 +86,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.lightBlue,
   },
+  textItem: {
+    fontSize: 16,
+    fontWeight: "bold",
+    fontStyle: "italic",
+    color: colors.darkBorder,
+  },
 });
 
-export default ({ navigation }) => {
+export default ({ navigation, route }) => {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   // user management
@@ -86,6 +106,16 @@ export default ({ navigation }) => {
       const user = await Util.getCurrentUser();
       if (user !== null) {
         setCurrentUser(user);
+
+        if (route.params && route.params.userId) {
+          const { token } = await UserStorage.retrieveUserIdAndToken();
+          setDisplayedUser(
+            await UserService.getUserById(route.params.userId, token)
+          );
+        } else {
+          setDisplayedUser(user);
+        }
+
         setIsProfileLoading(false);
       } else {
         navigation.dispatch(
@@ -106,7 +136,12 @@ export default ({ navigation }) => {
     };
 
     fetchData();
-  }, [navigation]);
+  }, [navigation, route]);
+
+  const getDateFromString = (strDate) => {
+    const date = new Date(strDate);
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -126,9 +161,9 @@ export default ({ navigation }) => {
                 size={screen.width * 0.3}
                 rounded
                 source={
-                  currentUser.profilePictureURL
+                  displayedUser.profilePictureURL
                     ? {
-                        uri: currentUser.profilePictureURL,
+                        uri: displayedUser.profilePictureURL,
                       }
                     : require("../assets/images/profile-placeholder.png")
                 }
@@ -137,7 +172,7 @@ export default ({ navigation }) => {
 
               <View style={styles.headerTextContainer}>
                 <Text style={styles.headerText}>
-                  {`${currentUser.firstName} ${currentUser.lastName}`}
+                  {`${displayedUser.firstName} ${displayedUser.lastName}`}
                 </Text>
                 <View style={styles.ratingContainer}>
                   <Text style={styles.ratingValue}>{"5 "}</Text>
@@ -152,6 +187,15 @@ export default ({ navigation }) => {
             </View>
 
             <ProfileItem
+              leftIcon={<Text style={styles.textItem}>Join date:</Text>}
+              text={`${moment(
+                getDateFromString(displayedUser.createdAt.replace("Z[UTC]", ""))
+              ).format("llll")}`}
+            />
+
+            <ItemSeparator />
+
+            <ProfileItem
               leftIcon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
                 <Feather
@@ -160,66 +204,91 @@ export default ({ navigation }) => {
                   color={colors.darkBorder}
                 />
               }
-              text={currentUser.description}
+              text={displayedUser.description}
             />
 
             <ItemSeparator />
 
             <ProfileItem
+              active={displayedUser.id !== currentUser.id}
+              onPress={() => {
+                if (displayedUser.id === currentUser.id) {
+                  return;
+                }
+
+                Linking.openURL(`mailto:${displayedUser.email}`);
+              }}
               leftIcon={
                 <Fontisto name="email" size={32} color={colors.darkBorder} />
               }
               rightIcon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
-                currentUser.emailEnabled ? (
+                displayedUser.emailEnabled ? (
                   <Ionicons
                     name="checkmark-circle-outline"
                     size={25}
                     color={colors.darkBorder}
                   />
                 ) : (
-                  <Text
-                    onPress={() =>
-                      navigation.push("Confirmation", {
-                        email: currentUser.email,
-                      })
-                    }
-                    style={styles.verifyText}
-                  >
-                    Verify
-                  </Text>
+                  displayedUser.id === currentUser.id && (
+                    <TouchableOpacity activeOpacity={0.6}>
+                      <Text
+                        onPress={() =>
+                          navigation.push("Confirmation", {
+                            email: displayedUser.email,
+                          })
+                        }
+                        style={styles.verifyText}
+                      >
+                        Verify
+                      </Text>
+                    </TouchableOpacity>
+                  )
                 )
               }
-              text={currentUser.email}
+              text={displayedUser.email}
             />
 
             <ItemSeparator />
 
             <ProfileItem
+              active={displayedUser.id !== currentUser.id}
+              onPress={() => {
+                if (displayedUser.id === currentUser.id) {
+                  return;
+                }
+
+                Linking.openURL(
+                  `tel:+${displayedUser.callingCode} ${displayedUser.phoneNumber}`
+                );
+              }}
               leftIcon={
                 <Feather name="phone" size={32} color={colors.darkBorder} />
               }
               rightIcon={
-                // eslint-disable-next-line react/jsx-wrap-multilines
-                <TouchableOpacity activeOpacity={0.6}>
-                  {currentUser.phoneEnabled ? (
-                    <Ionicons
-                      name="checkmark-circle-outline"
-                      size={25}
-                      color={colors.darkBorder}
-                    />
-                  ) : (
-                    <Text style={styles.verifyText}>Verify</Text>
-                  )}
-                </TouchableOpacity>
+                displayedUser.phoneEnabled ? (
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={25}
+                    color={colors.darkBorder}
+                  />
+                ) : (
+                  displayedUser.id === currentUser.id && (
+                    <TouchableOpacity activeOpacity={0.6}>
+                      <Text style={styles.verifyText}>Verify</Text>
+                    </TouchableOpacity>
+                  )
+                )
               }
-              text={`+${currentUser.callingCode} ${currentUser.phoneNumber}`}
+              text={`+${displayedUser.callingCode} ${displayedUser.phoneNumber}`}
             />
 
-            <GeneralButton
-              onPress={() => navigation.push("Settings")}
-              text="Settings"
-            />
+            {currentUser.id === displayedUser.id && (
+              <GeneralButton
+                onPress={() => navigation.push("Settings")}
+                text="Settings"
+              />
+            )}
           </ScrollView>
         </SafeAreaView>
       )}

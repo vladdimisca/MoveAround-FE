@@ -22,16 +22,23 @@ const styles = StyleSheet.create({
   },
 });
 
-export const NextButton = ({ onPress }) => {
+export const NextButton = ({ onPress, customStyle, active = true }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={styles.buttonContainer}
-      activeOpacity={0.7}
+      style={{
+        ...styles.buttonContainer,
+        ...customStyle,
+      }}
+      activeOpacity={active ? 0.7 : 1}
     >
       <LinearGradient
         style={styles.nextButton}
-        colors={[colors.lightBlue, colors.midBlue, colors.darkBlue]}
+        colors={
+          active === true
+            ? [colors.lightBlue, colors.midBlue, colors.darkBlue]
+            : [colors.border, colors.border]
+        }
       >
         <AntDesign
           resizeMode="contain"

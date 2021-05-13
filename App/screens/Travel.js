@@ -28,11 +28,20 @@ export default ({ navigation }) => {
         backgroundColor={colors.white}
       />
       <SafeAreaView style={styles.safeAreaContainer}>
-        <TravelOption onPress={() => navigation.push("Offer")} text="Offer" />
         <TravelOption
-          onPress={() => console.log("2")}
+          imageSource={require("../assets/images/driver.png")}
+          onPress={() =>
+            navigation.push("ProvideRoute", { nextRoute: "CompleteRoute" })
+          }
+          text="Driver"
+        />
+        <TravelOption
+          imageSource={require("../assets/images/passenger.png")}
+          onPress={() =>
+            navigation.push("ProvideRoute", { nextRoute: "RouteDateFilter" })
+          }
           buttonContainerStyle={{ elevation: 0 }}
-          text="Search"
+          text="Passenger"
         />
       </SafeAreaView>
     </View>

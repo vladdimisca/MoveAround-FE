@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Dimensions, Text } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 import colors from "../constants/colors";
 
@@ -23,18 +24,22 @@ const styles = StyleSheet.create({
   },
 });
 
-export const ProfileItem = ({ leftIcon, rightIcon, text }) => {
+export const ProfileItem = ({ leftIcon, rightIcon, text, onPress, active }) => {
   return (
     <View style={styles.container}>
       {leftIcon}
-      <Text
-        style={{
-          ...styles.textStyle,
-          width: rightIcon ? screen.width * 0.6 : screen.width * 0.75,
-        }}
-      >
-        {text}
-      </Text>
+      <TouchableOpacity activeOpacity={active ? 0.7 : 1}>
+        <Text
+          onPress={onPress}
+          style={{
+            ...styles.textStyle,
+            width: rightIcon ? screen.width * 0.6 : screen.width * 0.75,
+          }}
+        >
+          {text}
+        </Text>
+      </TouchableOpacity>
+
       {rightIcon}
     </View>
   );

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // config
-import config from "./config";
+import config from "../../config";
 
 const getUserById = async (userId, token) => {
   return axios

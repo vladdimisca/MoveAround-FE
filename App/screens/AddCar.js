@@ -12,6 +12,7 @@ import { CommonActions } from "@react-navigation/native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
 import NativeColorPicker from "native-color-picker";
+
 // constants
 import colors from "../constants/colors";
 
