@@ -8,6 +8,13 @@ import {
 } from "react-native";
 import { Avatar } from "react-native-elements";
 import moment from "moment";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import { Entypo } from "react-native-vector-icons";
 
 // constants
 import colors from "../constants/colors";
@@ -39,10 +46,14 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   detailContainer: {
+    maxWidth: "100%",
     flexDirection: "row",
     flex: 1,
   },
   detailText: {
+    flex: 1,
+    maxWidth: "100%",
+    flexWrap: "wrap",
     fontSize: 14,
   },
   rightColumn: {
@@ -50,13 +61,33 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
   },
+  menuText: {
+    color: "#e60000",
+    alignSelf: "center",
+    fontSize: 14,
+    padding: 5,
+  },
 });
 
-export const RouteCard = ({ route, onImagePress, onRoutePress }) => {
+export const RouteCard = ({
+  route,
+  onImagePress,
+  onRoutePress,
+  onSelect,
+  isRequest,
+  currentUser,
+}) => {
   const getDateFromString = (strDate) => {
     const date = new Date(strDate);
     return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   };
+
+  const showDelete =
+    !isRequest &&
+    (currentUser.id === route.user.id ||
+      (route.parentRoute && currentUser.id === route.parentRoute.user.id));
+  const showRequest = isRequest && currentUser.id !== route.user.id;
+  const showMenu = isRequest || showDelete;
 
   return (
     <View style={styles.card}>
@@ -74,10 +105,40 @@ export const RouteCard = ({ route, onImagePress, onRoutePress }) => {
           }
         />
         <Text style={styles.text}>{route.user.firstName}</Text>
+
+        {showMenu && (
+          <Menu>
+            <MenuTrigger>
+              <Entypo
+                size={32}
+                name="menu"
+                color={colors.border}
+                style={{ alignSelf: "center" }}
+              />
+            </MenuTrigger>
+            <MenuOptions>
+              <TouchableOpacity activeOpacity={0.7}>
+                <MenuOption onSelect={onSelect}>
+                  {showRequest && (
+                    <Text
+                      style={{
+                        ...styles.menuText,
+                        color: colors.lightBlue,
+                      }}
+                    >
+                      Send request
+                    </Text>
+                  )}
+                  {showDelete && <Text style={styles.menuText}>Delete</Text>}
+                </MenuOption>
+              </TouchableOpacity>
+            </MenuOptions>
+          </Menu>
+        )}
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.rightColumn}
-        activeOpacity={0.7}
+        activeOpacity={route.parentRoute ? 1 : 0.7}
         onPress={onRoutePress}
       >
         <View style={styles.detailContainer}>
@@ -89,9 +150,15 @@ export const RouteCard = ({ route, onImagePress, onRoutePress }) => {
           <Text style={styles.detailText}>{`${route.stopAddress}`}</Text>
         </View>
         <View style={styles.detailContainer}>
-          <Text style={styles.innerText}>Date: </Text>
+          <Text style={styles.innerText}>
+            {`${route.parentRoute ? "Price: " : "Date: "}`}
+          </Text>
           <Text style={styles.detailText}>
-            {`${moment(getDateFromString(route.startDate)).format("llll")}`}
+            {`${
+              route.parentRoute
+                ? route.price
+                : moment(getDateFromString(route.startDate)).format("llll")
+            }`}
           </Text>
         </View>
       </TouchableOpacity>

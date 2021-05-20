@@ -33,8 +33,49 @@ const getSentRequests = async (token) => {
     .then((response) => response.data);
 };
 
+const acceptRequest = async (requestId, token) => {
+  return axios
+    .post(
+      `${config.API_URL}/requests/${requestId}/accept`,
+      {},
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    )
+    .then((response) => response.data);
+};
+
+const rejectRequest = async (requestId, token) => {
+  return axios
+    .post(
+      `${config.API_URL}/requests/${requestId}/reject`,
+      {},
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    )
+    .then((response) => response.data);
+};
+
+const deleteRequest = async (requestId, token) => {
+  return axios
+    .delete(`${config.API_URL}/requests/${requestId}`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+    .then((response) => response.data);
+};
+
 export const RequestService = {
   createRequest,
   getReceivedRequests,
   getSentRequests,
+  acceptRequest,
+  rejectRequest,
+  deleteRequest,
 };

@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, SafeAreaView, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
+import { CommonActions } from "@react-navigation/routers";
 import moment from "moment";
+
+// geocoder
+import Geocoder from "react-native-geocoding";
 
 // constants
 import colors from "../constants/colors";
@@ -12,6 +23,7 @@ import config from "../../config";
 
 // services
 import { RouteService } from "../services/RouteService";
+import { UserService } from "../services/UserService";
 
 // storage
 import { UserStorage } from "../util/storage/UserStorage";
@@ -19,6 +31,7 @@ import { UserStorage } from "../util/storage/UserStorage";
 // components
 import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 import { ProfileItem, ItemSeparator } from "../components/ProfileItem";
+import { RouteCard } from "../components/RouteCard";
 
 const styles = StyleSheet.create({
   addressText: {
@@ -63,9 +76,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignSelf: "center",
   },
+  waypointsTitle: {
+    marginTop: 12,
+    fontSize: 22,
+    fontStyle: "italic",
+    alignSelf: "center",
+  },
+  emptyListText: {
+    fontSize: 15,
+    alignSelf: "center",
+    marginTop: 7,
+  },
 });
 
-export default ({ route }) => {
+export default ({ route, navigation }) => {
+  // initialize the geocoder
+  Geocoder.init(config.API_KEY, { language: "en" });
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [startAddress, setStartAddress] = useState("");
@@ -73,6 +100,8 @@ export default ({ route }) => {
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
   const [currentRoute, setCurrentRoute] = useState({});
+  const [waypoints, setWaypoints] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const getDateFromString = (strDate) => {
     const date = new Date(strDate);
@@ -93,7 +122,38 @@ export default ({ route }) => {
           setDistance(json.rows[0].elements[0].distance.text);
           setDuration(json.rows[0].elements[0].duration.text);
         })
-        .finally(() => setIsLoading(false));
+        .then(async () => {
+          const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+
+          await UserService.getUserById(userId, token).then((user) =>
+            setCurrentUser(user)
+          );
+
+          RouteService.getWaypoints(route.params.route.id, token)
+            .then((fetchedRoutes) => {
+              return Promise.all(
+                fetchedRoutes.map(async (fetchedRoute) => {
+                  const start = await Geocoder.from({
+                    latitude: fetchedRoute.startLatitude,
+                    longitude: fetchedRoute.startLongitude,
+                  });
+
+                  const stop = await Geocoder.from({
+                    latitude: fetchedRoute.stopLatitude,
+                    longitude: fetchedRoute.stopLongitude,
+                  });
+
+                  return {
+                    ...fetchedRoute,
+                    startAddress: start.results[0].formatted_address,
+                    stopAddress: stop.results[0].formatted_address,
+                  };
+                })
+              );
+            })
+            .then((fetchedRoutes) => setWaypoints(fetchedRoutes))
+            .finally(() => setIsLoading(false));
+        });
     })();
   }, [route]);
 
@@ -151,7 +211,7 @@ export default ({ route }) => {
 
           <ProfileItem
             leftIcon={<Text style={styles.addressText}>Car:</Text>}
-            text={currentRoute?.licensePlate}
+            text={currentRoute?.car?.licensePlate}
           />
 
           <ItemSeparator />
@@ -167,6 +227,97 @@ export default ({ route }) => {
             leftIcon={<Text style={styles.addressText}>No. of seats:</Text>}
             text={currentRoute?.availableSeats}
           />
+
+          <ItemSeparator />
+
+          <Text style={styles.waypointsTitle}>Waypoints</Text>
+
+          {waypoints.length === 0 && (
+            <Text style={styles.emptyListText}>
+              This route doesn&apos;t have any waypoints yet!
+            </Text>
+          )}
+
+          {waypoints.map((waypoint) => {
+            return (
+              <RouteCard
+                key={waypoint.id}
+                route={waypoint}
+                currentUser={currentUser}
+                onImagePress={() =>
+                  navigation.push("Profile", { userId: waypoint.user.id })
+                }
+                onSelect={() => {
+                  Alert.alert(
+                    "Do you really want to remove this waypoint?",
+                    "This action is not reversible!",
+                    [
+                      {
+                        text: "Delete",
+                        onPress: async () => {
+                          setIsLoading(true);
+                          const {
+                            token,
+                          } = await UserStorage.retrieveUserIdAndToken();
+
+                          RouteService.deleteRouteById(waypoint.id, token)
+                            .then(() => {
+                              setWaypoints(
+                                waypoints.filter((w) => w !== waypoint)
+                              );
+                              navigation.dispatch(
+                                CommonActions.reset({
+                                  index: 0,
+                                  key: null,
+                                  routes: [
+                                    {
+                                      name: "App",
+                                      state: {
+                                        routes: [{ name: "Routes" }],
+                                      },
+                                    },
+                                  ],
+                                })
+                              );
+                            })
+                            .catch((err) => {
+                              let alertMessage = "Oops, something went wrong!";
+                              if (
+                                err &&
+                                err.response &&
+                                err.response.request &&
+                                err.response.request._response
+                              ) {
+                                alertMessage = `${
+                                  JSON.parse(err.response.request._response)
+                                    .errorMessage
+                                }`;
+                              }
+
+                              Alert.alert(
+                                "Could not delete this waypoint!",
+                                alertMessage,
+                                [
+                                  {
+                                    text: "Ok",
+                                    style: "cancel",
+                                  },
+                                ]
+                              );
+                            })
+                            .finally(() => setIsLoading(false));
+                        },
+                      },
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                      },
+                    ]
+                  );
+                }}
+              />
+            );
+          })}
         </ScrollView>
       </SafeAreaView>
     </View>

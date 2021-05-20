@@ -33,6 +33,8 @@ import RouteDateFilter from "../screens/RouteDateFilter";
 import FilteredRoutes from "../screens/FilteredRoutes";
 import ViewRoute from "../screens/ViewRoute";
 import Requests from "../screens/Requests";
+import Reviews from "../screens/Reviews";
+import AddReview from "../screens/AddReview";
 
 const emptyHeaderOptions = {
   title: null,
@@ -105,6 +107,16 @@ const ProfileStackScreen = () => (
       component={ChangePassword}
       options={emptyHeaderOptions}
     />
+    <ProfileStack.Screen
+      name="Reviews"
+      component={Reviews}
+      options={{ ...headerOptions, title: "Reviews" }}
+    />
+    <ProfileStack.Screen
+      name="AddReview"
+      component={AddReview}
+      options={{ ...headerOptions, title: "Leave a review" }}
+    />
   </ProfileStack.Navigator>
 );
 
@@ -169,6 +181,16 @@ const RoutesStackScreen = () => (
       options={emptyHeaderOptions}
     />
     <RoutesStack.Screen
+      name="Reviews"
+      component={Reviews}
+      options={{ ...headerOptions, title: "Reviews" }}
+    />
+    <RoutesStack.Screen
+      name="AddReview"
+      component={AddReview}
+      options={{ ...headerOptions, title: "Leave a review" }}
+    />
+    <RoutesStack.Screen
       name="ViewRoute"
       component={ViewRoute}
       options={{ ...headerOptions, title: "View route details" }}
@@ -203,6 +225,16 @@ const RequestsStackScreen = () => (
       name="ChangePassword"
       component={ChangePassword}
       options={emptyHeaderOptions}
+    />
+    <RequestsStack.Screen
+      name="Reviews"
+      component={Reviews}
+      options={{ ...headerOptions, title: "Reviews" }}
+    />
+    <RequestsStack.Screen
+      name="AddReview"
+      component={AddReview}
+      options={{ ...headerOptions, title: "Leave a review" }}
     />
     <RequestsStack.Screen
       name="ViewRoute"
@@ -246,9 +278,19 @@ const TravelStackScreen = () => (
       options={{ headerShown: false }}
     />
     <TravelStack.Screen
+      name="Reviews"
+      component={Reviews}
+      options={{ ...headerOptions, title: "Reviews" }}
+    />
+    <TravelStack.Screen
+      name="AddReview"
+      component={AddReview}
+      options={{ ...headerOptions, title: "Leave a review" }}
+    />
+    <TravelStack.Screen
       name="ViewRoute"
       component={ViewRoute}
-      options={{ ...headerOptions, title: "View route details" }}
+      options={{ ...headerOptions, title: "Route details" }}
     />
   </TravelStack.Navigator>
 );

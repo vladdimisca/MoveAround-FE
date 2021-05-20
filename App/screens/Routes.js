@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
 
@@ -17,6 +24,7 @@ import { UserStorage } from "../util/storage/UserStorage";
 
 // services
 import { RouteService } from "../services/RouteService";
+import { UserService } from "../services/UserService";
 
 // components
 import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
@@ -42,26 +50,37 @@ export default ({ navigation }) => {
   const [isDriver, setIsDriver] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const getRoutesAsDriver = async () => {
+  const getRoutes = async (action) => {
     setIsLoading(true);
     const { userId, token } = await UserStorage.retrieveUserIdAndToken();
 
-    RouteService.getAllRoutesByUserId(userId, token)
+    await UserService.getUserById(userId, token).then((user) =>
+      setCurrentUser(user)
+    );
+
+    action(userId, token)
       .then((fetchedRoutes) => {
         return Promise.all(
           fetchedRoutes.map(async (route) => {
+            let currentRoute = route;
+            if (route.parentRoute) {
+              currentRoute = route.parentRoute;
+            }
+
             const start = await Geocoder.from({
-              latitude: route.startLatitude,
-              longitude: route.startLongitude,
+              latitude: currentRoute.startLatitude,
+              longitude: currentRoute.startLongitude,
             });
 
             const stop = await Geocoder.from({
-              latitude: route.stopLatitude,
-              longitude: route.stopLongitude,
+              latitude: currentRoute.stopLatitude,
+              longitude: currentRoute.stopLongitude,
             });
+
             return {
-              ...route,
+              ...currentRoute,
               startAddress: start.results[0].formatted_address,
               stopAddress: stop.results[0].formatted_address,
             };
@@ -74,7 +93,7 @@ export default ({ navigation }) => {
 
   useEffect(() => {
     (async () => {
-      getRoutesAsDriver();
+      getRoutes(RouteService.getRoutesAsDriver);
     })();
   }, []);
 
@@ -114,7 +133,7 @@ export default ({ navigation }) => {
                 }
 
                 setIsDriver(true);
-                getRoutesAsDriver();
+                getRoutes(RouteService.getRoutesAsDriver);
               }}
               text="As driver"
             />
@@ -123,7 +142,14 @@ export default ({ navigation }) => {
           <View style={{ flex: 1, marginLeft: -12 }}>
             <GeneralButton
               isActive={!isDriver}
-              onPress={() => setIsDriver(false)}
+              onPress={async () => {
+                if (!isDriver) {
+                  return;
+                }
+
+                setIsDriver(false);
+                getRoutes(RouteService.getRoutesAsPassenger);
+              }}
               text="As passenger"
             />
           </View>
@@ -135,10 +161,65 @@ export default ({ navigation }) => {
               <RouteCard
                 key={route.id}
                 route={route}
+                currentUser={currentUser}
                 onImagePress={() =>
                   navigation.push("Profile", { userId: route.user.id })
                 }
-                onRoutePress={() => navigation.push("ViewRoute", { route })}
+                onRoutePress={() => {
+                  navigation.push("ViewRoute", { route });
+                }}
+                onSelect={() => {
+                  Alert.alert(
+                    "Do you really want to remove this route?",
+                    "This action is not reversible!",
+                    [
+                      {
+                        text: "Delete",
+                        onPress: async () => {
+                          setIsLoading(true);
+                          const {
+                            token,
+                          } = await UserStorage.retrieveUserIdAndToken();
+
+                          RouteService.deleteRouteById(route.id, token)
+                            .then(() => {
+                              setRoutes(routes.filter((r) => r !== route));
+                            })
+                            .catch((err) => {
+                              let alertMessage = "Oops, something went wrong!";
+                              if (
+                                err &&
+                                err.response &&
+                                err.response.request &&
+                                err.response.request._response
+                              ) {
+                                alertMessage = `${
+                                  JSON.parse(err.response.request._response)
+                                    .errorMessage
+                                }`;
+                              }
+
+                              Alert.alert(
+                                "Could not delete this route!",
+                                alertMessage,
+                                [
+                                  {
+                                    text: "Ok",
+                                    style: "cancel",
+                                  },
+                                ]
+                              );
+                            })
+                            .finally(() => setIsLoading(false));
+                        },
+                      },
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                      },
+                    ]
+                  );
+                }}
               />
             );
           })}

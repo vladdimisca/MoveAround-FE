@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
-
-// geocoder
-import Geocoder from "react-native-geocoding";
 
 // constants
 import colors from "../constants/colors";
@@ -17,6 +21,7 @@ import { UserStorage } from "../util/storage/UserStorage";
 
 // services
 import { RequestService } from "../services/RequestService";
+import { UserService } from "../services/UserService";
 
 // components
 import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
@@ -36,39 +41,75 @@ const styles = StyleSheet.create({
 });
 
 export default ({ navigation }) => {
-  // initialize the geocoder
-  Geocoder.init(config.API_KEY, { language: "en" });
-
   const [isDriver, setIsDriver] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [requests, setRequests] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const getRequests = async (action) => {
     setIsLoading(true);
-    const { token } = await UserStorage.retrieveUserIdAndToken();
+    const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+
+    await UserService.getUserById(userId, token).then((user) =>
+      setCurrentUser(user)
+    );
 
     action(token)
       .then((fetchedRequests) => {
         return Promise.all(
           fetchedRequests.map(async (request) => {
-            const start = await Geocoder.from({
-              latitude: request.startLatitude,
-              longitude: request.startLongitude,
-            });
+            const urlToFetchDistance = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${request.startLatitude},${request.startLongitude}&destinations=${request.stopLatitude}%2C${request.stopLongitude}&key=${config.API_KEY}`;
 
-            const stop = await Geocoder.from({
-              latitude: request.stopLatitude,
-              longitude: request.stopLongitude,
-            });
+            const result = await fetch(urlToFetchDistance).then((response) =>
+              response.json()
+            );
+
             return {
               ...request,
-              startAddress: start.results[0].formatted_address,
-              stopAddress: stop.results[0].formatted_address,
+              startAddress: result.origin_addresses[0],
+              stopAddress: result.destination_addresses[0],
+              distance: result.rows[0].elements[0].distance.text,
             };
           })
         );
       })
       .then((fetchedRequests) => setRequests(fetchedRequests))
+      .finally(() => setIsLoading(false));
+  };
+
+  const handleRequest = async (requestId, action) => {
+    setIsLoading(true);
+    const { token } = await UserStorage.retrieveUserIdAndToken();
+
+    action(requestId, token)
+      .then(() => {
+        setRequests(requests.filter((req) => req.id !== requestId));
+      })
+      .catch((err) => {
+        let alertMessage = "Oops, something went wrong!";
+        if (
+          err &&
+          err.response &&
+          err.response.request &&
+          err.response.request._response
+        ) {
+          alertMessage = `${
+            JSON.parse(err.response.request._response).errorMessage
+          }`;
+        }
+
+        Alert.alert("Could not perform this action!", alertMessage, [
+          {
+            text: "Ok",
+            style: "cancel",
+          },
+        ]);
+        if (isDriver) {
+          getRequests(RequestService.getReceivedRequests);
+        } else {
+          getRequests(RequestService.getSentRequests);
+        }
+      })
       .finally(() => setIsLoading(false));
   };
 
@@ -142,11 +183,33 @@ export default ({ navigation }) => {
               <RequestCard
                 key={request.id}
                 request={request}
+                currentUser={currentUser}
                 onImagePress={() =>
                   navigation.push("Profile", { userId: request.user.id })
                 }
                 onRoutePress={() =>
                   navigation.push("ViewRoute", { route: request.route })
+                }
+                onDelete={
+                  request.user.id === currentUser.id
+                    ? async () => {
+                        handleRequest(request.id, RequestService.deleteRequest);
+                      }
+                    : () => null
+                }
+                onAccept={
+                  request.route.user.id === currentUser.id
+                    ? async () => {
+                        handleRequest(request.id, RequestService.acceptRequest);
+                      }
+                    : () => null
+                }
+                onReject={
+                  request.route.user.id === currentUser.id
+                    ? async () => {
+                        handleRequest(request.id, RequestService.rejectRequest);
+                      }
+                    : () => null
                 }
               />
             );

@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Avatar } from "react-native-elements";
+import moment from "moment";
 import {
   Menu,
   MenuOptions,
   MenuOption,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { Entypo } from "react-native-vector-icons";
+import { Entypo, FontAwesome } from "react-native-vector-icons";
 
 // constants
 import colors from "../constants/colors";
@@ -71,18 +72,19 @@ const styles = StyleSheet.create({
   },
 });
 
-export const RequestCard = ({
-  request,
+export const ReviewCard = ({
+  review,
   onImagePress,
-  onRoutePress,
-  currentUser,
   onDelete,
-  onAccept,
-  onReject,
+  onUpdate,
+  currentUser,
 }) => {
-  const showDelete = currentUser.id === request.user.id;
-  const showOptions = currentUser.id === request.route.user.id;
-  const showMenu = showDelete || showOptions;
+  const getDateFromString = (strDate) => {
+    const date = new Date(strDate);
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  };
+
+  const showOptionsMenu = currentUser.id === review.sender.id;
 
   return (
     <View style={styles.card}>
@@ -92,16 +94,16 @@ export const RequestCard = ({
           size={screen.width * 0.2}
           rounded
           source={
-            request.user.profilePictureURL
+            review.sender.profilePictureURL
               ? {
-                  uri: request.user.profilePictureURL,
+                  uri: review.sender.profilePictureURL,
                 }
               : require("../assets/images/profile-placeholder.png")
           }
         />
-        <Text style={styles.text}>{request.user.firstName}</Text>
+        <Text style={styles.text}>{review.sender.firstName}</Text>
 
-        {showMenu && (
+        {showOptionsMenu && (
           <Menu>
             <MenuTrigger>
               <Entypo
@@ -113,67 +115,51 @@ export const RequestCard = ({
             </MenuTrigger>
             <MenuOptions>
               <TouchableOpacity activeOpacity={0.7}>
-                {showDelete && (
-                  <MenuOption onSelect={onDelete}>
-                    <Text style={styles.menuText}>Delete</Text>
-                  </MenuOption>
-                )}
+                <MenuOption onSelect={onUpdate}>
+                  <Text style={{ ...styles.menuText, color: colors.lightBlue }}>
+                    Update
+                  </Text>
+                </MenuOption>
+
+                <ItemSeparator />
+
+                <MenuOption onSelect={onDelete}>
+                  <Text style={styles.menuText}>Delete</Text>
+                </MenuOption>
               </TouchableOpacity>
-
-              {showOptions && (
-                <>
-                  <TouchableOpacity activeOpacity={0.7}>
-                    <MenuOption onSelect={onAccept}>
-                      <Text
-                        style={{
-                          ...styles.menuText,
-                          color: colors.lightBlue,
-                        }}
-                      >
-                        Accept
-                      </Text>
-                    </MenuOption>
-                  </TouchableOpacity>
-
-                  <ItemSeparator />
-
-                  <TouchableOpacity activeOpacity={0.7}>
-                    <MenuOption onSelect={onReject}>
-                      <Text style={styles.menuText}>Reject</Text>
-                    </MenuOption>
-                  </TouchableOpacity>
-                </>
-              )}
             </MenuOptions>
           </Menu>
         )}
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.rightColumn}
-        activeOpacity={0.7}
-        onPress={onRoutePress}
-      >
+
+      <View style={styles.rightColumn}>
         <View style={styles.detailContainer}>
-          <Text style={styles.innerText}>From: </Text>
-          <Text style={styles.detailText}>{`${request.startAddress}`}</Text>
+          <Text style={styles.innerText}>Date: </Text>
+          <Text style={styles.detailText}>
+            {`${moment(getDateFromString(review.dateTime)).format("llll")}`}
+          </Text>
         </View>
         <View style={styles.detailContainer}>
-          <Text style={styles.innerText}>To: </Text>
-          <Text style={styles.detailText}>{`${request.stopAddress}`}</Text>
+          <Text style={styles.innerText}>Rating: </Text>
+          <Text style={styles.detailText}>
+            {`${review.rating} `}
+            <FontAwesome name="star" size={13} color={colors.lightText} />
+          </Text>
         </View>
         <View style={styles.detailContainer}>
-          <Text style={styles.innerText}>Distance: </Text>
-          <Text style={styles.detailText}>{`${request.distance}`}</Text>
-        </View>
-        <View style={styles.detailContainer}>
-          <Text style={styles.innerText}>Status: </Text>
+          <Text style={styles.innerText}>Traveled as: </Text>
           <Text style={styles.detailText}>
             {`${
-              request.status.charAt(0) + request.status.slice(1).toLowerCase()
+              review.travelRole.charAt(0) +
+              review.travelRole.slice(1).toLowerCase()
             }`}
           </Text>
         </View>
-      </TouchableOpacity>
+        <View style={styles.detailContainer}>
+          <Text style={styles.innerText}>Comment: </Text>
+          <Text style={styles.detailText}>{`${review.text}`}</Text>
+        </View>
+      </View>
     </View>
   );
 };

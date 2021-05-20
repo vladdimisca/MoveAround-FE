@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
+import { CommonActions } from "@react-navigation/routers";
 
 // geocoder
 import Geocoder from "react-native-geocoding";
@@ -17,6 +25,8 @@ import { UserStorage } from "../util/storage/UserStorage";
 
 // services
 import { RouteService } from "../services/RouteService";
+import { UserService } from "../services/UserService";
+import { RequestService } from "../services/RequestService";
 
 // components
 import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
@@ -40,21 +50,30 @@ export default ({ route, navigation }) => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [waypoint, setWaypoint] = useState(null);
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const { token } = await UserStorage.retrieveUserIdAndToken();
+      const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+
+      await UserService.getUserById(userId, token).then((user) =>
+        setCurrentUser(user)
+      );
 
       const payload = {
         startLatitude: route.params.startLocation.latitude,
         startLongitude: route.params.startLocation.longitude,
         stopLatitude: route.params.stopLocation.latitude,
         stopLongitude: route.params.stopLocation.longitude,
-        startDate: route.params.dateTime,
       };
+      setWaypoint(payload);
 
-      RouteService.getPossibleRoutes(payload, token)
+      RouteService.getPossibleRoutes(
+        { ...payload, startDate: route.params.dateTime },
+        token
+      )
         .then((fetchedRoutes) => {
           return Promise.all(
             fetchedRoutes.map(async (fetchedRoute) => {
@@ -98,12 +117,66 @@ export default ({ route, navigation }) => {
           {routes.map((currentRoute) => {
             return (
               <RouteCard
+                isRequest
                 key={currentRoute.id}
                 route={currentRoute}
+                currentUser={currentUser}
                 onImagePress={() =>
                   navigation.push("Profile", { userId: currentRoute.user.id })
                 }
-                onRoutePress={() => console.log("Works too!")}
+                onRoutePress={() =>
+                  navigation.push("ViewRoute", { route: currentRoute })
+                }
+                onSelect={async () => {
+                  setIsLoading(true);
+                  const { token } = await UserStorage.retrieveUserIdAndToken();
+
+                  RequestService.createRequest(
+                    { ...waypoint, route: { id: currentRoute.id } },
+                    token
+                  )
+                    .then(() => {
+                      navigation.dispatch(
+                        CommonActions.reset({
+                          index: 0,
+                          key: null,
+                          routes: [
+                            {
+                              name: "App",
+                              state: {
+                                routes: [{ name: "Requests" }],
+                              },
+                            },
+                          ],
+                        })
+                      );
+                    })
+                    .catch((err) => {
+                      let alertMessage = "Oops, something went wrong!";
+                      if (
+                        err &&
+                        err.response &&
+                        err.response.request &&
+                        err.response.request._response
+                      ) {
+                        alertMessage = `${
+                          JSON.parse(err.response.request._response)
+                            .errorMessage
+                        }`;
+                      }
+                      Alert.alert(
+                        "The request was not registered!",
+                        alertMessage,
+                        [
+                          {
+                            text: "Ok",
+                            style: "cancel",
+                          },
+                        ]
+                      );
+                    })
+                    .finally(() => setIsLoading(false));
+                }}
               />
             );
           })}

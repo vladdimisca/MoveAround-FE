@@ -23,9 +23,39 @@ const getRouteById = async (routeId, token) => {
     .then((response) => response.data);
 };
 
-const getAllRoutesByUserId = async (userId, token) => {
+const deleteRouteById = async (routeId, token) => {
   return axios
-    .get(`${config.API_URL}/routes/user/${userId}`, {
+    .delete(`${config.API_URL}/routes/${routeId}`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+    .then((response) => response.data);
+};
+
+const getRoutesAsDriver = async (userId, token) => {
+  return axios
+    .get(`${config.API_URL}/routes/user/${userId}/driver`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+    .then((response) => response.data);
+};
+
+const getRoutesAsPassenger = async (userId, token) => {
+  return axios
+    .get(`${config.API_URL}/routes/user/${userId}/passenger`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+    .then((response) => response.data);
+};
+
+const getWaypoints = async (routeId, token) => {
+  return axios
+    .get(`${config.API_URL}/routes/${routeId}/waypoints`, {
       headers: {
         Authorization: token,
       },
@@ -46,6 +76,9 @@ const getPossibleRoutes = async (data, token) => {
 export const RouteService = {
   createRoute,
   getRouteById,
-  getAllRoutesByUserId,
+  deleteRouteById,
+  getRoutesAsDriver,
+  getRoutesAsPassenger,
+  getWaypoints,
   getPossibleRoutes,
 };

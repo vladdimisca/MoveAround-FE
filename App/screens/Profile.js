@@ -35,6 +35,7 @@ import { UserStorage } from "../util/storage/UserStorage";
 
 // services
 import { UserService } from "../services/UserService";
+import { ReviewService } from "../services/ReviewService";
 
 const screen = Dimensions.get("window");
 const styles = StyleSheet.create({
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ratingValue: {
-    fontSize: 20,
+    fontSize: 18,
     color: colors.lightText,
   },
   ratingStar: {
@@ -96,6 +97,7 @@ const styles = StyleSheet.create({
 
 export default ({ navigation, route }) => {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [rating, setRating] = useState(0);
 
   // user management
   const [currentUser, setCurrentUser] = useState(null);
@@ -104,18 +106,25 @@ export default ({ navigation, route }) => {
   useEffect(() => {
     const fetchData = async () => {
       const user = await Util.getCurrentUser();
+      const { token } = await UserStorage.retrieveUserIdAndToken();
+
       if (user !== null) {
         setCurrentUser(user);
+        let userToDisplay = user;
 
         if (route.params && route.params.userId) {
-          const { token } = await UserStorage.retrieveUserIdAndToken();
-          setDisplayedUser(
-            await UserService.getUserById(route.params.userId, token)
+          userToDisplay = await UserService.getUserById(
+            route.params.userId,
+            token
           );
-        } else {
-          setDisplayedUser(user);
         }
 
+        await ReviewService.getAvgRatingByUserId(
+          userToDisplay.id,
+          token
+        ).then((avgRating) => setRating(avgRating));
+
+        setDisplayedUser(userToDisplay);
         setIsProfileLoading(false);
       } else {
         navigation.dispatch(
@@ -174,15 +183,24 @@ export default ({ navigation, route }) => {
                 <Text style={styles.headerText}>
                   {`${displayedUser.firstName} ${displayedUser.lastName}`}
                 </Text>
-                <View style={styles.ratingContainer}>
-                  <Text style={styles.ratingValue}>{"5 "}</Text>
-                  <FontAwesome
-                    name="star"
-                    size={16}
-                    color={colors.lightText}
-                    style={styles.ratingStar}
-                  />
-                </View>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.push("Reviews", { userId: displayedUser.id })
+                  }
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.ratingContainer}>
+                    <Text style={styles.ratingValue}>
+                      {rating === 0 ? "- " : `${Math.floor(rating * 10) / 10} `}
+                    </Text>
+                    <FontAwesome
+                      name="star"
+                      size={16}
+                      color={colors.lightText}
+                      style={styles.ratingStar}
+                    />
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
 

@@ -49,6 +49,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignSelf: "center",
   },
+  selectColorText: {
+    marginBottom: 15,
+    marginHorizontal: 25,
+    fontSize: 17,
+    fontWeight: "bold",
+  },
 });
 
 // ignore warning logs from NativeColorPicker dependency
@@ -89,9 +95,6 @@ export default ({ navigation, route }) => {
       if (route.params && route.params.carId) {
         setFetchingCar(true);
         navigation.setOptions({ title: "Update your car" });
-        setCar((value) => {
-          return { ...value, carId: route.params.carId };
-        });
 
         const { token } = await UserStorage.retrieveUserIdAndToken();
         CarService.getCarById(route.params.carId, token)
@@ -180,14 +183,7 @@ export default ({ navigation, route }) => {
             }
           />
 
-          <Text
-            style={{
-              marginBottom: 15,
-              marginHorizontal: 25,
-              fontSize: 17,
-              fontWeight: "bold",
-            }}
-          >
+          <Text style={styles.selectColorText}>
             Select the color of your car
           </Text>
 

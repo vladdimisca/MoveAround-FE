@@ -52,18 +52,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   text: {
-    fontSize: 14,
+    fontSize: 15,
     flexDirection: "row",
   },
   innerText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "bold",
     fontStyle: "italic",
   },
   menuText: {
     color: "#e60000",
     alignSelf: "center",
-    fontSize: 14,
+    fontSize: 15,
     padding: 5,
   },
 });
