@@ -60,6 +60,14 @@ const styles = StyleSheet.create({
   inputContainerStyle: {
     marginHorizontal: 5,
   },
+  textAreaContainer: {
+    marginHorizontal: 5,
+    paddingVertical: 8,
+    marginBottom: -8,
+    borderWidth: 2 * StyleSheet.hairlineWidth,
+    borderColor: colors.darkBorder,
+    borderRadius: 10,
+  },
   leftIconContainerStyle: {
     marginLeft: 5,
     marginRight: 12,
@@ -332,9 +340,11 @@ export default ({ navigation }) => {
                   color={colors.darkBorder}
                 />
               }
+              multiline
+              maxLength={120}
               label="Description"
-              labelStyle={styles.labelStyle}
-              inputContainerStyle={styles.inputContainerStyle}
+              labelStyle={{ ...styles.labelStyle, marginBottom: 8 }}
+              inputContainerStyle={styles.textAreaContainer}
               leftIconContainerStyle={styles.leftIconContainerStyle}
               value={user.description}
               onChangeText={(desc) =>

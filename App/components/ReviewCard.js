@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { Avatar } from "react-native-elements";
+import { Avatar, Input } from "react-native-elements";
 import moment from "moment";
 import {
   Menu,
@@ -69,6 +69,22 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 14,
     padding: 5,
+  },
+  labelStyle: {
+    color: colors.text,
+    fontStyle: "italic",
+    fontSize: 14,
+    marginBottom: 5,
+    marginLeft: -10,
+  },
+  inputContainerStyle: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 2 * StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    borderRadius: 10,
+    marginBottom: -15,
+    marginLeft: -10,
   },
 });
 
@@ -155,10 +171,16 @@ export const ReviewCard = ({
             }`}
           </Text>
         </View>
-        <View style={styles.detailContainer}>
-          <Text style={styles.innerText}>Comment: </Text>
-          <Text style={styles.detailText}>{`${review.text}`}</Text>
-        </View>
+
+        <Input
+          multiline
+          disabled
+          label="Comment:"
+          labelStyle={styles.labelStyle}
+          inputContainerStyle={styles.inputContainerStyle}
+          inputStyle={{ fontSize: 14 }}
+          value={review.text}
+        />
       </View>
     </View>
   );

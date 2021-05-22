@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
 
@@ -30,7 +37,7 @@ const styles = StyleSheet.create({
   },
   reviewButton: {
     position: "absolute",
-    marginBottom: 5,
+    marginBottom: 8,
     zIndex: 2,
   },
 });
@@ -79,8 +86,63 @@ export default ({ route, navigation }) => {
                     userId: review.sender.id,
                   })
                 }
-                onDelete={() => console.log("Works!")}
-                onUpdate={() => console.log("Works!")}
+                onUpdate={() =>
+                  navigation.push("AddReview", {
+                    reviewId: review.id,
+                  })
+                }
+                onDelete={async () => {
+                  Alert.alert(
+                    "Do you really want to remove this review?",
+                    "This action is not reversible!",
+                    [
+                      {
+                        text: "Delete",
+                        onPress: async () => {
+                          setIsLoading(true);
+                          const {
+                            token,
+                          } = await UserStorage.retrieveUserIdAndToken();
+
+                          ReviewService.deleteReviewById(review.id, token)
+                            .then(() => {
+                              setReviews(reviews.filter((r) => r !== review));
+                            })
+                            .catch((err) => {
+                              let alertMessage = "Oops, something went wrong!";
+                              if (
+                                err &&
+                                err.response &&
+                                err.response.request &&
+                                err.response.request._response
+                              ) {
+                                alertMessage = `${
+                                  JSON.parse(err.response.request._response)
+                                    .errorMessage
+                                }`;
+                              }
+
+                              Alert.alert(
+                                "Could not delete this review!",
+                                alertMessage,
+                                [
+                                  {
+                                    text: "Ok",
+                                    style: "cancel",
+                                  },
+                                ]
+                              );
+                            })
+                            .finally(() => setIsLoading(false));
+                        },
+                      },
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                      },
+                    ]
+                  );
+                }}
               />
             );
           })}

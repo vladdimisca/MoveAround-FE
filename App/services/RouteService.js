@@ -63,9 +63,9 @@ const getWaypoints = async (routeId, token) => {
     .then((response) => response.data);
 };
 
-const getPossibleRoutes = async (data, token) => {
+const getPossibleRoutes = async (startDate, token) => {
   return axios
-    .post(`${config.API_URL}/routes/matching`, data, {
+    .get(`${config.API_URL}/routes/matching/${startDate}`, {
       headers: {
         Authorization: token,
       },
