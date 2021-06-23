@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginHorizontal: 25,
     color: "red",
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "center",
   },
 });
@@ -111,9 +111,9 @@ export default ({ route, navigation }) => {
           setDuration(json.rows[0].elements[0].duration.text);
         });
 
-      const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+      const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-      CarService.getAllCarsByUserId(userId, token)
+      CarService.getAllCarsByUserId(userId)
         .then((cs) =>
           setCars(
             cs.map((c) => {
@@ -244,7 +244,7 @@ export default ({ route, navigation }) => {
           <Input
             keyboardType="numeric"
             placeholder="Enter the price..."
-            label="Price"
+            label="Price (USD)"
             labelStyle={styles.labelStyle}
             inputContainerStyle={styles.inputContainerStyle}
             value={price}
@@ -274,7 +274,6 @@ export default ({ route, navigation }) => {
               setError("");
               setIsReqLoading(true);
 
-              const { token } = await UserStorage.retrieveUserIdAndToken();
               const payload = {
                 startLatitude: route.params.startLocation.latitude,
                 startLongitude: route.params.startLocation.longitude,
@@ -286,7 +285,7 @@ export default ({ route, navigation }) => {
                 startDate: formatDate("YYYY-MM-DD HH:mm"),
               };
 
-              RouteService.createRoute(payload, token)
+              RouteService.createRoute(payload)
                 .then(() => {
                   navigation.dispatch(
                     CommonActions.reset({

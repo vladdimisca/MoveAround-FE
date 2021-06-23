@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   SafeAreaView,
   View,
   Dimensions,
   Text,
-  Alert,
+  RefreshControl,
 } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { Avatar, Input } from "react-native-elements";
@@ -26,9 +26,6 @@ import colors from "../constants/colors";
 import { GeneralButton } from "../components/GeneralButton";
 import { ItemSeparator } from "../components/ProfileItem";
 import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
-
-// util
-import { Util } from "../util/Util";
 
 // services
 import { UserService } from "../services/UserService";
@@ -75,7 +72,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginHorizontal: 25,
     color: "red",
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "center",
   },
   actionText: {
@@ -87,47 +84,51 @@ const styles = StyleSheet.create({
 });
 
 export default ({ navigation }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isScreenLoading, setIsScreenLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [countryCode, setCountryCode] = useState("RO");
   const [profileUpdateError, setProfileUpdateError] = useState("");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = await Util.getCurrentUser();
-      if (currentUser !== null) {
-        setUser(currentUser);
+  const fetchData = useCallback(async () => {
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-        await getAllCountries()
-          .then(
-            (countries) =>
-              countries.find((c) =>
-                c.callingCode.includes(currentUser.callingCode)
-              ).cca2
-          )
-          .then((cca2) => setCountryCode(cca2));
-        setIsScreenLoading(false);
-      } else {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            key: null,
-            routes: [
-              {
-                name: "Authentication",
-                state: {
-                  routes: [{ name: "Login" }],
-                },
+    const currentUser = await UserService.getUserById(userId).catch(() => null);
+
+    if (currentUser !== null) {
+      setUser(currentUser);
+
+      await getAllCountries()
+        .then(
+          (countries) =>
+            countries.find((c) =>
+              c.callingCode.includes(currentUser.callingCode)
+            ).cca2
+        )
+        .then((cca2) => setCountryCode(cca2));
+      setIsScreenLoading(false);
+    } else {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          key: null,
+          routes: [
+            {
+              name: "Authentication",
+              state: {
+                routes: [{ name: "Login" }],
               },
-            ],
-          })
-        );
-      }
-    };
-
-    fetchData();
+            },
+          ],
+        })
+      );
+    }
   }, [navigation]);
+
+  useEffect(() => {
+    fetchData();
+  }, [navigation, fetchData]);
 
   const redirectToProfile = () => {
     navigation.dispatch(
@@ -159,8 +160,14 @@ export default ({ navigation }) => {
       aspect: [1, 1],
       quality: 1,
     });
-    const { token, userId } = await UserStorage.retrieveUserIdAndToken();
-    await UserService.updateProfilePictureById(userId, token, result.base64)
+
+    if (result.cancelled) {
+      setIsLoading(false);
+      return;
+    }
+
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
+    await UserService.updateProfilePictureById(userId, result.base64)
       .then((response) => {
         setUser((value) => {
           return { ...value, profilePictureURL: response.profilePictureURL };
@@ -173,8 +180,9 @@ export default ({ navigation }) => {
   const updateUser = async () => {
     setIsLoading(true);
 
-    const { token, userId } = await UserStorage.retrieveUserIdAndToken();
-    UserService.updateUserById(userId, token, user)
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
+
+    UserService.updateUserById(userId, user)
       .then((updatedUser) => {
         setUser(updatedUser);
         redirectToProfile();
@@ -215,48 +223,6 @@ export default ({ navigation }) => {
     });
   };
 
-  const deleteAccount = async () => {
-    Alert.alert(
-      "Do you want to delete your account?",
-      "This action is not reversible!",
-      [
-        {
-          text: "Yes",
-          onPress: async () => {
-            setIsLoading(true);
-            const {
-              token,
-              userId,
-            } = await UserStorage.retrieveUserIdAndToken();
-            UserService.deleteAccount(userId, token)
-              .then(() => signOut())
-              .catch(() => {
-                navigation.dispatch(
-                  CommonActions.reset({
-                    index: 0,
-                    key: null,
-                    routes: [
-                      {
-                        name: "Authentication",
-                        state: {
-                          routes: [{ name: "Login" }],
-                        },
-                      },
-                    ],
-                  })
-                );
-              })
-              .finally(() => setIsLoading(false));
-          },
-        },
-        {
-          text: "No",
-          style: "cancel",
-        },
-      ]
-    );
-  };
-
   const changePassword = () => {
     navigation.push("ChangePassword");
   };
@@ -279,7 +245,18 @@ export default ({ navigation }) => {
         </View>
       ) : (
         <SafeAreaView style={styles.container}>
-          <ScrollView>
+          <ScrollView
+            refreshControl={
+              // eslint-disable-next-line react/jsx-wrap-multilines
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={() => {
+                  setIsRefreshing(true);
+                  fetchData().finally(() => setIsRefreshing(false));
+                }}
+              />
+            }
+          >
             <View style={styles.avatarContainer}>
               <Avatar
                 size={screen.width * 0.35}
@@ -430,7 +407,7 @@ export default ({ navigation }) => {
               <ItemSeparator />
 
               <TouchableOpacity
-                onPress={() => deleteAccount()}
+                onPress={() => navigation.push("DeleteAccount")}
                 activeOpacity={0.6}
               >
                 <Text style={styles.actionText}>Delete account</Text>

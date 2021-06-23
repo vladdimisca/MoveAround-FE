@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -49,13 +50,14 @@ export default ({ route, navigation }) => {
   // initialize the geocoder
   Geocoder.init(config.API_KEY, { language: "en" });
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [waypoint, setWaypoint] = useState(null);
 
-  useEffect(() => {
-    (async () => {
+  const getMatchingRoutes = useCallback(
+    async (overlay = true) => {
       const computeRoadDistance = async (from, to) => {
         const urlToFetchDistance = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${from}&destinations=${to}&key=${config.API_KEY}`;
 
@@ -113,10 +115,13 @@ export default ({ route, navigation }) => {
         return false;
       };
 
-      setIsLoading(true);
-      const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+      if (overlay) {
+        setIsLoading(true);
+      }
 
-      await UserService.getUserById(userId, token).then((user) =>
+      const { userId } = await UserStorage.retrieveUserIdAndToken();
+
+      await UserService.getUserById(userId).then((user) =>
         setCurrentUser(user)
       );
 
@@ -131,7 +136,7 @@ export default ({ route, navigation }) => {
       const origin = [subRoute.startLatitude, subRoute.startLongitude];
       const destination = [subRoute.stopLatitude, subRoute.stopLongitude];
 
-      RouteService.getPossibleRoutes(route.params.dateTime, token).then(
+      RouteService.getPossibleRoutes(route.params.dateTime).then(
         async (fetchedRoutes) => {
           Promise.all(
             fetchedRoutes.map(async (fetchedRoute) => {
@@ -193,8 +198,13 @@ export default ({ route, navigation }) => {
             .finally(() => setIsLoading(false));
         }
       );
-    })();
-  }, [route]);
+    },
+    [route]
+  );
+
+  useEffect(() => {
+    getMatchingRoutes();
+  }, [getMatchingRoutes]);
 
   return (
     <View style={styles.container}>
@@ -210,7 +220,18 @@ export default ({ route, navigation }) => {
         backgroundColor={colors.white}
       />
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => {
+                setIsRefreshing(true);
+                getMatchingRoutes(false).finally(() => setIsRefreshing(false));
+              }}
+            />
+          }
+        >
           {routes.map((currentRoute) => {
             return (
               <RouteCard
@@ -226,12 +247,11 @@ export default ({ route, navigation }) => {
                 }
                 onSelect={async () => {
                   setIsLoading(true);
-                  const { token } = await UserStorage.retrieveUserIdAndToken();
 
-                  RequestService.createRequest(
-                    { ...waypoint, route: { id: currentRoute.id } },
-                    token
-                  )
+                  RequestService.createRequest({
+                    ...waypoint,
+                    route: { id: currentRoute.id },
+                  })
                     .then(() => {
                       navigation.dispatch(
                         CommonActions.reset({

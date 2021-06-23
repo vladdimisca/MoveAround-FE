@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   responseText: {
     marginVertical: 5,
     marginHorizontal: 25,
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "center",
   },
 });

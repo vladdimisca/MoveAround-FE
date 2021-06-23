@@ -86,21 +86,22 @@ export const RequestCard = ({
 
   return (
     <View style={styles.card}>
-      <TouchableOpacity activeOpacity={0.7} onPress={onImagePress}>
-        <Avatar
-          activeOpacity={0.7}
-          size={screen.width * 0.2}
-          rounded
-          source={
-            request.user.profilePictureURL
-              ? {
-                  uri: request.user.profilePictureURL,
-                }
-              : require("../assets/images/profile-placeholder.png")
-          }
-        />
-        <Text style={styles.text}>{request.user.firstName}</Text>
-
+      <View>
+        <TouchableOpacity activeOpacity={0.7} onPress={onImagePress}>
+          <Avatar
+            activeOpacity={0.7}
+            size={screen.width * 0.2}
+            rounded
+            source={
+              request.user.profilePictureURL
+                ? {
+                    uri: request.user.profilePictureURL,
+                  }
+                : require("../assets/images/profile-placeholder.png")
+            }
+          />
+          <Text style={styles.text}>{request.user.firstName}</Text>
+        </TouchableOpacity>
         {showMenu && (
           <Menu>
             <MenuTrigger>
@@ -147,7 +148,8 @@ export const RequestCard = ({
             </MenuOptions>
           </Menu>
         )}
-      </TouchableOpacity>
+      </View>
+
       <TouchableOpacity
         style={styles.rightColumn}
         activeOpacity={0.7}

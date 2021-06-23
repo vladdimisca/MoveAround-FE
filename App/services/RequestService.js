@@ -1,73 +1,41 @@
-import axios from "axios";
+import axiosInstance from "../util/AxiosUtil";
 
 // config
 import config from "../../config";
 
-const createRequest = async (data, token) => {
-  return axios
-    .post(`${config.API_URL}/requests`, data, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const createRequest = async (data) => {
+  return axiosInstance
+    .post(`${config.API_URL}/requests`, data)
     .then((response) => response.data);
 };
 
-const getReceivedRequests = async (token) => {
-  return axios
-    .get(`${config.API_URL}/requests/received`, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const getReceivedRequests = async () => {
+  return axiosInstance
+    .get(`${config.API_URL}/requests/received`)
     .then((response) => response.data);
 };
 
-const getSentRequests = async (token) => {
-  return axios
-    .get(`${config.API_URL}/requests/sent`, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const getSentRequests = async () => {
+  return axiosInstance
+    .get(`${config.API_URL}/requests/sent`)
     .then((response) => response.data);
 };
 
-const acceptRequest = async (requestId, token) => {
-  return axios
-    .post(
-      `${config.API_URL}/requests/${requestId}/accept`,
-      {},
-      {
-        headers: {
-          Authorization: token,
-        },
-      }
-    )
+const acceptRequest = async (requestId) => {
+  return axiosInstance
+    .post(`${config.API_URL}/requests/${requestId}/accept`)
     .then((response) => response.data);
 };
 
-const rejectRequest = async (requestId, token) => {
-  return axios
-    .post(
-      `${config.API_URL}/requests/${requestId}/reject`,
-      {},
-      {
-        headers: {
-          Authorization: token,
-        },
-      }
-    )
+const rejectRequest = async (requestId) => {
+  return axiosInstance
+    .post(`${config.API_URL}/requests/${requestId}/reject`)
     .then((response) => response.data);
 };
 
-const deleteRequest = async (requestId, token) => {
-  return axios
-    .delete(`${config.API_URL}/requests/${requestId}`, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const deleteRequest = async (requestId) => {
+  return axiosInstance
+    .delete(`${config.API_URL}/requests/${requestId}`)
     .then((response) => response.data);
 };
 

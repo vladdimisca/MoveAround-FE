@@ -23,7 +23,7 @@ import { UserStorage } from "../util/storage/UserStorage";
 
 const styles = StyleSheet.create({
   inputContainerStyle: {
-    marginHorizontal: 5,
+    marginHorizontal: 10,
   },
   leftIconContainerStyle: {
     marginLeft: 5,
@@ -43,14 +43,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ({ navigation }) => {
+export default ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   // input fields
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [repeatNewPassword, setRepeatNewPassword] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <View style={{ flex: 1 }}>
@@ -66,49 +64,20 @@ export default ({ navigation }) => {
       />
       <SafeAreaView>
         <ScrollView>
-          <Text style={styles.text}>Change your password</Text>
+          <Text style={styles.text}>
+            {route.params?.userId ? "Remove this user" : "Delete your account"}
+          </Text>
 
           <Input
             secureTextEntry
             leftIcon={
               <Ionicons name="key-outline" size={24} color={colors.text} />
             }
-            placeholder="Old password..."
+            placeholder="Enter your password..."
             inputContainerStyle={styles.inputContainerStyle}
             leftIconContainerStyle={styles.leftIconContainerStyle}
-            value={oldPassword}
-            onChangeText={(pass) => setOldPassword(pass)}
-            autoCapitalize="none"
-          />
-
-          <Input
-            secureTextEntry
-            leftIcon={
-              <Ionicons name="key-outline" size={24} color={colors.text} />
-            }
-            placeholder="New password..."
-            inputContainerStyle={styles.inputContainerStyle}
-            leftIconContainerStyle={styles.leftIconContainerStyle}
-            value={newPassword}
-            onChangeText={(pass) => setNewPassword(pass)}
-            autoCapitalize="none"
-          />
-
-          <Input
-            secureTextEntry
-            leftIcon={
-              <Ionicons
-                name="checkmark-circle-outline"
-                size={24}
-                color={colors.text}
-              />
-            }
-            placeholder="Repeat new password..."
-            inputContainerStyle={styles.inputContainerStyle}
-            leftIconContainerStyle={styles.leftIconContainerStyle}
-            value={repeatNewPassword}
-            onChangeText={(pass) => setRepeatNewPassword(pass)}
-            autoCapitalize="none"
+            value={password}
+            onChangeText={setPassword}
           />
 
           {isLoading === false && error !== "" && (
@@ -116,13 +85,9 @@ export default ({ navigation }) => {
           )}
 
           <GeneralButton
-            text="Change password"
+            text={route.params?.userId ? "Remove user" : "Delete account"}
             onPress={async () => {
               if (isLoading === true) {
-                return;
-              }
-              if (newPassword !== repeatNewPassword) {
-                setError("Passwords not matching!");
                 return;
               }
               setError("");
@@ -130,9 +95,14 @@ export default ({ navigation }) => {
 
               const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-              UserService.changePassword(userId, oldPassword, newPassword)
+              UserService.deleteAccount(
+                route.params?.userId ? route.params?.userId : userId,
+                password
+              )
                 .then(async () => {
-                  await UserStorage.clearStorage();
+                  if (route.params?.userId) {
+                    await UserStorage.clearStorage();
+                  }
 
                   navigation.dispatch(
                     CommonActions.reset({
@@ -140,9 +110,15 @@ export default ({ navigation }) => {
                       key: null,
                       routes: [
                         {
-                          name: "Authentication",
+                          name: route.params?.userId
+                            ? "Admin"
+                            : "Authentication",
                           state: {
-                            routes: [{ name: "Login" }],
+                            routes: [
+                              {
+                                name: route.params?.userId ? "Users" : "Login",
+                              },
+                            ],
                           },
                         },
                       ],

@@ -13,7 +13,7 @@ import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 import { UserStorage } from "../util/storage/UserStorage";
 
 // util
-import { Util } from "../util/Util";
+import { UserService } from "../services/UserService";
 
 const styles = StyleSheet.create({
   container: {
@@ -32,7 +32,9 @@ const styles = StyleSheet.create({
 export default ({ navigation }) => {
   useFocusEffect(() => {
     const fetchData = async () => {
-      const user = await Util.getCurrentUser();
+      const { userId } = await UserStorage.retrieveUserIdAndToken();
+
+      const user = await UserService.getUserById(userId).catch(() => null);
 
       if (user !== null) {
         navigation.dispatch(
@@ -40,7 +42,7 @@ export default ({ navigation }) => {
             index: 0,
             routes: [
               {
-                name: "App",
+                name: user.role === "ADMIN" ? "Admin" : "App",
                 state: {
                   routes: [{ name: "Profile" }],
                 },

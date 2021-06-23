@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -41,20 +42,22 @@ const styles = StyleSheet.create({
 });
 
 export default ({ navigation }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDriver, setIsDriver] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [requests, setRequests] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const getRequests = async (action) => {
-    setIsLoading(true);
-    const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+  const getRequests = useCallback(async (action, overlay = true) => {
+    if (overlay) {
+      setIsLoading(true);
+    }
 
-    await UserService.getUserById(userId, token).then((user) =>
-      setCurrentUser(user)
-    );
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-    action(token)
+    await UserService.getUserById(userId).then((user) => setCurrentUser(user));
+
+    action()
       .then((fetchedRequests) => {
         return Promise.all(
           fetchedRequests.map(async (request) => {
@@ -75,13 +78,12 @@ export default ({ navigation }) => {
       })
       .then((fetchedRequests) => setRequests(fetchedRequests))
       .finally(() => setIsLoading(false));
-  };
+  }, []);
 
   const handleRequest = async (requestId, action) => {
     setIsLoading(true);
-    const { token } = await UserStorage.retrieveUserIdAndToken();
 
-    action(requestId, token)
+    action(requestId)
       .then(() => {
         setRequests(requests.filter((req) => req.id !== requestId));
       })
@@ -114,10 +116,8 @@ export default ({ navigation }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      getRequests(RequestService.getReceivedRequests);
-    })();
-  }, []);
+    getRequests(RequestService.getReceivedRequests);
+  }, [getRequests]);
 
   return (
     <View style={styles.container}>
@@ -177,7 +177,25 @@ export default ({ navigation }) => {
           </View>
         </View>
 
-        <ScrollView style={{ marginTop: 75 }}>
+        <ScrollView
+          refreshControl={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => {
+                setIsRefreshing(true);
+
+                const actionType = isDriver
+                  ? RequestService.getReceivedRequests
+                  : RequestService.getSentRequests;
+                getRequests(actionType, false).finally(() =>
+                  setIsRefreshing(false)
+                );
+              }}
+            />
+          }
+          style={{ marginTop: 75 }}
+        >
           {requests.map((request) => {
             return (
               <RequestCard

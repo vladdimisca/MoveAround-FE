@@ -104,20 +104,22 @@ export const ReviewCard = ({
 
   return (
     <View style={styles.card}>
-      <TouchableOpacity activeOpacity={0.7} onPress={onImagePress}>
-        <Avatar
-          activeOpacity={0.7}
-          size={screen.width * 0.2}
-          rounded
-          source={
-            review.sender.profilePictureURL
-              ? {
-                  uri: review.sender.profilePictureURL,
-                }
-              : require("../assets/images/profile-placeholder.png")
-          }
-        />
-        <Text style={styles.text}>{review.sender.firstName}</Text>
+      <View>
+        <TouchableOpacity activeOpacity={0.7} onPress={onImagePress}>
+          <Avatar
+            activeOpacity={0.7}
+            size={screen.width * 0.2}
+            rounded
+            source={
+              review.sender.profilePictureURL
+                ? {
+                    uri: review.sender.profilePictureURL,
+                  }
+                : require("../assets/images/profile-placeholder.png")
+            }
+          />
+          <Text style={styles.text}>{review.sender.firstName}</Text>
+        </TouchableOpacity>
 
         {showOptionsMenu && (
           <Menu>
@@ -146,7 +148,7 @@ export const ReviewCard = ({
             </MenuOptions>
           </Menu>
         )}
-      </TouchableOpacity>
+      </View>
 
       <View style={styles.rightColumn}>
         <View style={styles.detailContainer}>

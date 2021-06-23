@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -43,22 +44,31 @@ const styles = StyleSheet.create({
 });
 
 export default ({ route, navigation }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+  const fetchReviews = useCallback(
+    async (overlay = true) => {
+      if (overlay) {
+        setIsLoading(true);
+      }
 
-      await UserService.getUserById(userId, token).then(setCurrentUser);
+      const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-      ReviewService.getReviewsByUserId(route.params.userId, token)
+      await UserService.getUserById(userId).then(setCurrentUser);
+
+      ReviewService.getReviewsByUserId(route.params.userId)
         .then(setReviews)
         .finally(() => setIsLoading(false));
-    })();
-  }, [route]);
+    },
+    [route]
+  );
+
+  useEffect(() => {
+    fetchReviews();
+  }, [route, fetchReviews]);
 
   return (
     <View style={styles.container}>
@@ -74,7 +84,18 @@ export default ({ route, navigation }) => {
         backgroundColor={colors.white}
       />
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => {
+                setIsRefreshing(true);
+                fetchReviews(false).finally(() => setIsRefreshing(false));
+              }}
+            />
+          }
+        >
           {reviews.map((review) => {
             return (
               <ReviewCard
@@ -100,11 +121,8 @@ export default ({ route, navigation }) => {
                         text: "Delete",
                         onPress: async () => {
                           setIsLoading(true);
-                          const {
-                            token,
-                          } = await UserStorage.retrieveUserIdAndToken();
 
-                          ReviewService.deleteReviewById(review.id, token)
+                          ReviewService.deleteReviewById(review.id)
                             .then(() => {
                               setReviews(reviews.filter((r) => r !== review));
                             })

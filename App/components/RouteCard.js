@@ -91,20 +91,22 @@ export const RouteCard = ({
 
   return (
     <View style={styles.card}>
-      <TouchableOpacity activeOpacity={0.7} onPress={onImagePress}>
-        <Avatar
-          activeOpacity={0.7}
-          size={screen.width * 0.2}
-          rounded
-          source={
-            route.user.profilePictureURL
-              ? {
-                  uri: route.user.profilePictureURL,
-                }
-              : require("../assets/images/profile-placeholder.png")
-          }
-        />
-        <Text style={styles.text}>{route.user.firstName}</Text>
+      <View>
+        <TouchableOpacity activeOpacity={0.7} onPress={onImagePress}>
+          <Avatar
+            activeOpacity={0.7}
+            size={screen.width * 0.2}
+            rounded
+            source={
+              route.user.profilePictureURL
+                ? {
+                    uri: route.user.profilePictureURL,
+                  }
+                : require("../assets/images/profile-placeholder.png")
+            }
+          />
+          <Text style={styles.text}>{route.user.firstName}</Text>
+        </TouchableOpacity>
 
         {showMenu && (
           <Menu>
@@ -135,7 +137,8 @@ export const RouteCard = ({
             </MenuOptions>
           </Menu>
         )}
-      </TouchableOpacity>
+      </View>
+
       <TouchableOpacity
         style={styles.rightColumn}
         activeOpacity={route.parentRoute ? 1 : 0.7}
@@ -156,7 +159,7 @@ export const RouteCard = ({
           <Text style={styles.detailText}>
             {`${
               route.parentRoute
-                ? route.price
+                ? `${route.price} $`
                 : moment(getDateFromString(route.startDate)).format("llll")
             }`}
           </Text>

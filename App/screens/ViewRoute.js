@@ -70,12 +70,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  errorText: {
-    marginHorizontal: 25,
-    color: "red",
-    fontSize: 16,
-    alignSelf: "center",
-  },
   waypointsTitle: {
     marginTop: 12,
     fontSize: 22,
@@ -123,13 +117,13 @@ export default ({ route, navigation }) => {
           setDuration(json.rows[0].elements[0].duration.text);
         })
         .then(async () => {
-          const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+          const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-          await UserService.getUserById(userId, token).then((user) =>
+          await UserService.getUserById(userId).then((user) =>
             setCurrentUser(user)
           );
 
-          RouteService.getWaypoints(route.params.route.id, token)
+          RouteService.getWaypoints(route.params.route.id)
             .then((fetchedRoutes) => {
               return Promise.all(
                 fetchedRoutes.map(async (fetchedRoute) => {
@@ -218,7 +212,7 @@ export default ({ route, navigation }) => {
 
           <ProfileItem
             leftIcon={<Text style={styles.addressText}>Price:</Text>}
-            text={currentRoute?.price}
+            text={`${currentRoute?.price} $`}
           />
 
           <ItemSeparator />
@@ -256,11 +250,8 @@ export default ({ route, navigation }) => {
                         text: "Delete",
                         onPress: async () => {
                           setIsLoading(true);
-                          const {
-                            token,
-                          } = await UserStorage.retrieveUserIdAndToken();
 
-                          RouteService.deleteRouteById(waypoint.id, token)
+                          RouteService.deleteRouteById(waypoint.id)
                             .then(() => {
                               setWaypoints(
                                 waypoints.filter((w) => w !== waypoint)

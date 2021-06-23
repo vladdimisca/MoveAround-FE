@@ -15,9 +15,6 @@ import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 // services
 import { ReviewService } from "../services/ReviewService";
 
-// storage
-import { UserStorage } from "../util/storage/UserStorage";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -43,7 +40,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginHorizontal: 25,
     color: "red",
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "center",
   },
   dropdown: {
@@ -109,8 +106,7 @@ export default ({ navigation, route }) => {
         setFetchingReview(true);
         navigation.setOptions({ title: "Update your review" });
 
-        const { token } = await UserStorage.retrieveUserIdAndToken();
-        ReviewService.getReviewById(route.params.reviewId, token)
+        ReviewService.getReviewById(route.params.reviewId)
           .then(setReview)
           .finally(() => setFetchingReview(false));
       } else {
@@ -188,14 +184,12 @@ export default ({ navigation, route }) => {
               setError("");
               setIsLoading(true);
 
-              const { token } = await UserStorage.retrieveUserIdAndToken();
               const payload = { ...review };
 
               const response =
                 review.id === null
-                  ? delete payload.id &&
-                    ReviewService.createReview(payload, token)
-                  : ReviewService.updateReviewById(payload.id, payload, token);
+                  ? delete payload.id && ReviewService.createReview(payload)
+                  : ReviewService.updateReviewById(payload.id, payload);
 
               response
                 .then(() => {

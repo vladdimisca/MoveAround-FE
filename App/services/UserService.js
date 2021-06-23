@@ -1,26 +1,22 @@
-import axios from "axios";
+import axiosInstance from "../util/AxiosUtil";
 
 // config
 import config from "../../config";
 
-const getUserById = async (userId, token) => {
-  return axios
-    .get(`${config.API_URL}/users/${userId}`, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const getUserById = async (userId) => {
+  return axiosInstance
+    .get(`${config.API_URL}/users/${userId}`)
     .then((response) => response.data);
 };
 
 const register = async (data) => {
-  return axios
+  return axiosInstance
     .post(`${config.API_URL}/users/register`, data)
     .then((response) => response.data);
 };
 
 const login = async (phoneNumber, callingCode, password) => {
-  return axios
+  return axiosInstance
     .post(`${config.API_URL}/users/login`, {
       phoneNumber,
       callingCode,
@@ -34,79 +30,62 @@ const login = async (phoneNumber, callingCode, password) => {
     });
 };
 
-const updateUserById = async (userId, token, user) => {
-  return axios
-    .put(`${config.API_URL}/users/${userId}`, user, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const updateUserById = async (userId, user) => {
+  return axiosInstance
+    .put(`${config.API_URL}/users/${userId}`, user)
     .then((response) => response.data);
 };
 
-const updateProfilePictureById = async (userId, token, base64picture) => {
-  return axios
-    .patch(`${config.API_URL}/users/${userId}/profile-picture`, base64picture, {
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-      },
-    })
+const updateProfilePictureById = async (userId, base64picture) => {
+  return axiosInstance
+    .patch(`${config.API_URL}/users/${userId}/profile-picture`, base64picture)
     .then((response) => response.data);
 };
 
 const recoverAccount = async (email) => {
-  return axios
+  return axiosInstance
     .post(`${config.API_URL}/users/${email}/forgot-password`)
     .then((response) => response.data);
 };
 
-const deleteAccount = async (userId, token) => {
-  return axios.delete(`${config.API_URL}/users/${userId}`, {
+const deleteAccount = async (userId, password) => {
+  return axiosInstance.delete(`${config.API_URL}/users/${userId}`, {
     headers: {
-      Authorization: token,
-      "Content-Type": "application/json",
+      Password: password,
     },
   });
 };
 
-const changePassword = async (userId, token, oldPassword, newPassword) => {
-  return axios.patch(
-    `${config.API_URL}users/${userId}/password`,
-    {
-      newPassword,
-      oldPassword,
-    },
-    {
-      headers: {
-        Authorization: token,
-      },
-    }
-  );
+const changePassword = async (userId, oldPassword, newPassword) => {
+  return axiosInstance.patch(`${config.API_URL}/users/${userId}/password`, {
+    newPassword,
+    oldPassword,
+  });
 };
 
-const activateEmail = async (userId, token, emailCode) => {
-  return axios.post(
+const activateEmail = async (userId, emailCode) => {
+  return axiosInstance.post(
     `${config.API_URL}users/${userId}/activation/email`,
-    { emailCode },
-    {
-      headers: {
-        Authorization: token,
-      },
-    }
+    { emailCode }
   );
 };
 
-const resendEmailCode = async (userId, token) => {
-  return axios.post(
-    `${config.API_URL}users/${userId}/activation/email/resend`,
-    {},
-    {
-      headers: {
-        Authorization: token,
-      },
-    }
+const resendEmailCode = async (userId) => {
+  return axiosInstance.post(
+    `${config.API_URL}users/${userId}/activation/email/resend`
   );
+};
+
+const getAllUsers = async () => {
+  return axiosInstance
+    .get(`${config.API_URL}/users`)
+    .then((response) => response.data);
+};
+
+const getJoinStatistics = async () => {
+  return axiosInstance
+    .get(`${config.API_URL}/users/join-statistics`)
+    .then((response) => response.data);
 };
 
 export const UserService = {
@@ -120,4 +99,6 @@ export const UserService = {
   changePassword,
   activateEmail,
   resendEmailCode,
+  getAllUsers,
+  getJoinStatistics,
 };

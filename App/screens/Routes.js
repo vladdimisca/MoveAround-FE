@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { DotIndicator } from "react-native-indicators";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -47,20 +48,22 @@ export default ({ navigation }) => {
   // initialize the geocoder
   Geocoder.init(config.API_KEY, { language: "en" });
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDriver, setIsDriver] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const getRoutes = async (action) => {
-    setIsLoading(true);
-    const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+  const getRoutes = useCallback(async (action, overlay = true) => {
+    if (overlay) {
+      setIsLoading(true);
+    }
 
-    await UserService.getUserById(userId, token).then((user) =>
-      setCurrentUser(user)
-    );
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-    action(userId, token)
+    await UserService.getUserById(userId).then((user) => setCurrentUser(user));
+
+    action(userId)
       .then((fetchedRoutes) => {
         return Promise.all(
           fetchedRoutes.map(async (route) => {
@@ -89,13 +92,11 @@ export default ({ navigation }) => {
       })
       .then((fetchedRoutes) => setRoutes(fetchedRoutes))
       .finally(() => setIsLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      getRoutes(RouteService.getRoutesAsDriver);
-    })();
-  }, []);
+    getRoutes(RouteService.getRoutesAsDriver);
+  }, [getRoutes]);
 
   return (
     <View style={styles.container}>
@@ -155,7 +156,25 @@ export default ({ navigation }) => {
           </View>
         </View>
 
-        <ScrollView style={{ marginTop: 75 }}>
+        <ScrollView
+          refreshControl={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => {
+                setIsRefreshing(true);
+
+                const actionType = isDriver
+                  ? RouteService.getRoutesAsDriver
+                  : RouteService.getRoutesAsPassenger;
+                getRoutes(actionType, false).finally(() =>
+                  setIsRefreshing(false)
+                );
+              }}
+            />
+          }
+          style={{ marginTop: 75 }}
+        >
           {routes.map((route) => {
             return (
               <RouteCard
@@ -177,11 +196,8 @@ export default ({ navigation }) => {
                         text: "Delete",
                         onPress: async () => {
                           setIsLoading(true);
-                          const {
-                            token,
-                          } = await UserStorage.retrieveUserIdAndToken();
 
-                          RouteService.deleteRouteById(route.id, token)
+                          RouteService.deleteRouteById(route.id)
                             .then(() => {
                               setRoutes(routes.filter((r) => r !== route));
                             })

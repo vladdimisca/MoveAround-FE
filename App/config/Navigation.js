@@ -14,6 +14,9 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 // constants
 import colors from "../constants/colors";
 
+// root navigation
+import { navigationRef } from "../util/RootNavigation";
+
 // screens
 import Splash from "../screens/Splash";
 import Register from "../screens/Register";
@@ -35,6 +38,9 @@ import ViewRoute from "../screens/ViewRoute";
 import Requests from "../screens/Requests";
 import Reviews from "../screens/Reviews";
 import AddReview from "../screens/AddReview";
+import DeleteAccount from "../screens/DeleteAccount";
+import Statistics from "../screens/Statistics";
+import Users from "../screens/Users";
 
 const emptyHeaderOptions = {
   title: null,
@@ -105,6 +111,11 @@ const ProfileStackScreen = () => (
     <ProfileStack.Screen
       name="ChangePassword"
       component={ChangePassword}
+      options={emptyHeaderOptions}
+    />
+    <ProfileStack.Screen
+      name="DeleteAccount"
+      component={DeleteAccount}
       options={emptyHeaderOptions}
     />
     <ProfileStack.Screen
@@ -181,6 +192,11 @@ const RoutesStackScreen = () => (
       options={emptyHeaderOptions}
     />
     <RoutesStack.Screen
+      name="DeleteAccount"
+      component={DeleteAccount}
+      options={emptyHeaderOptions}
+    />
+    <RoutesStack.Screen
       name="Reviews"
       component={Reviews}
       options={{ ...headerOptions, title: "Reviews" }}
@@ -224,6 +240,11 @@ const RequestsStackScreen = () => (
     <RequestsStack.Screen
       name="ChangePassword"
       component={ChangePassword}
+      options={emptyHeaderOptions}
+    />
+    <RequestsStack.Screen
+      name="DeleteAccount"
+      component={DeleteAccount}
       options={emptyHeaderOptions}
     />
     <RequestsStack.Screen
@@ -356,6 +377,88 @@ const TabsScreen = () => {
   );
 };
 
+const AdminProfileStack = createStackNavigator();
+const AdminProfileStackScreen = () => (
+  <AdminProfileStack.Navigator initialRouteName="Profile">
+    <AdminProfileStack.Screen
+      name="Profile"
+      component={Profile}
+      options={{ headerShown: false }}
+    />
+    <AdminProfileStack.Screen
+      name="ChangePassword"
+      component={ChangePassword}
+      options={emptyHeaderOptions}
+    />
+  </AdminProfileStack.Navigator>
+);
+
+const StatisticsStack = createStackNavigator();
+const StatisticsStackScreen = () => (
+  <StatisticsStack.Navigator initialRouteName="Statistics">
+    <StatisticsStack.Screen
+      name="Statistics"
+      component={Statistics}
+      options={{ ...headerOptions, title: "Statistics" }}
+    />
+  </StatisticsStack.Navigator>
+);
+
+const UsersStack = createStackNavigator();
+const UsersStackScreen = () => (
+  <UsersStack.Navigator initialRouteName="Statistics">
+    <UsersStack.Screen
+      name="Users"
+      component={Users}
+      options={{ ...headerOptions, title: "Users" }}
+    />
+    <UsersStack.Screen
+      name="DeleteAccount"
+      component={DeleteAccount}
+      options={emptyHeaderOptions}
+    />
+  </UsersStack.Navigator>
+);
+
+const AdminTabs = createBottomTabNavigator();
+const AdminTabsScreen = () => {
+  return (
+    <AdminTabs.Navigator tabBarOptions={tabBarOptions}>
+      <AdminTabs.Screen
+        name="Users"
+        component={UsersStackScreen}
+        options={{
+          tabBarIcon: (props) => (
+            <FontAwesome5 name="users" size={props.size} color={props.color} />
+          ),
+        }}
+      />
+      <AdminTabs.Screen
+        name="Statistics"
+        component={StatisticsStackScreen}
+        options={{
+          tabBarIcon: (props) => (
+            <Ionicons
+              name="stats-chart"
+              size={props.size}
+              color={props.color}
+            />
+          ),
+        }}
+      />
+      <AdminTabs.Screen
+        name="Profile"
+        component={AdminProfileStackScreen}
+        options={{
+          tabBarIcon: (props) => (
+            <Ionicons name="md-person" size={props.size} color={props.color} />
+          ),
+        }}
+      />
+    </AdminTabs.Navigator>
+  );
+};
+
 const MainStack = createStackNavigator();
 const MainStackScreen = () => (
   <MainStack.Navigator initialRouteName="Authentication">
@@ -369,11 +472,16 @@ const MainStackScreen = () => (
       component={TabsScreen}
       options={{ headerShown: false }}
     />
+    <MainStack.Screen
+      name="Admin"
+      component={AdminTabsScreen}
+      options={{ headerShown: false }}
+    />
   </MainStack.Navigator>
 );
 
 export default () => (
-  <NavigationContainer>
+  <NavigationContainer ref={navigationRef}>
     <MainStackScreen />
   </NavigationContainer>
 );

@@ -23,9 +23,6 @@ import { FocusAwareStatusBar } from "../components/FocusAwareStatusBar";
 // services
 import { CarService } from "../services/CarService";
 
-// storage
-import { UserStorage } from "../util/storage/UserStorage";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -46,7 +43,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginHorizontal: 25,
     color: "red",
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "center",
   },
   selectColorText: {
@@ -96,8 +93,7 @@ export default ({ navigation, route }) => {
         setFetchingCar(true);
         navigation.setOptions({ title: "Update your car" });
 
-        const { token } = await UserStorage.retrieveUserIdAndToken();
-        CarService.getCarById(route.params.carId, token)
+        CarService.getCarById(route.params.carId)
           .then((c) => setCar({ ...c, year: c.year.toString() }))
           .finally(() => setFetchingCar(false));
       } else {
@@ -215,13 +211,11 @@ export default ({ navigation, route }) => {
               setError("");
               setIsLoading(true);
 
-              const { token } = await UserStorage.retrieveUserIdAndToken();
-
               const payload = { ...car, year: parseInt(car.year, 10) };
               const response =
                 car.id === null
-                  ? delete payload.id && CarService.createCar(payload, token)
-                  : CarService.updateCarById(car.id, payload, token);
+                  ? delete payload.id && CarService.createCar(payload)
+                  : CarService.updateCarById(car.id, payload);
 
               response
                 .then(() => {

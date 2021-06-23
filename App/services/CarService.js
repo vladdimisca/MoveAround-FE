@@ -1,54 +1,34 @@
-import axios from "axios";
+import axiosInstance from "../util/AxiosUtil";
 
 // config
 import config from "../../config";
 
-const createCar = async (data, token) => {
-  return axios
-    .post(`${config.API_URL}/cars`, data, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const createCar = async (data) => {
+  return axiosInstance
+    .post(`${config.API_URL}/cars`, data)
     .then((response) => response.data);
 };
 
-const updateCarById = async (carId, data, token) => {
-  return axios
-    .put(`${config.API_URL}/cars/${carId}`, data, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const updateCarById = async (carId, data) => {
+  return axiosInstance
+    .put(`${config.API_URL}/cars/${carId}`, data)
     .then((response) => response.data);
 };
 
-const getCarById = async (carId, token) => {
-  return axios
-    .get(`${config.API_URL}/cars/${carId}`, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const getCarById = async (carId) => {
+  return axiosInstance
+    .get(`${config.API_URL}/cars/${carId}`)
     .then((response) => response.data);
 };
 
-const getAllCarsByUserId = async (userId, token) => {
-  return axios
-    .get(`${config.API_URL}/cars/user/${userId}`, {
-      headers: {
-        Authorization: token,
-      },
-    })
+const getAllCarsByUserId = async (userId) => {
+  return axiosInstance
+    .get(`${config.API_URL}/cars/user/${userId}`)
     .then((response) => response.data);
 };
 
-const deleteCarById = async (carId, token) => {
-  return axios.delete(`${config.API_URL}/cars/${carId}`, {
-    headers: {
-      Authorization: token,
-    },
-  });
+const deleteCarById = async (carId) => {
+  return axiosInstance.delete(`${config.API_URL}/cars/${carId}`);
 };
 
 export const CarService = {

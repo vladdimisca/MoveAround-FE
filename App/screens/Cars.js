@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -6,6 +6,7 @@ import {
   Text,
   Alert,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -69,21 +70,22 @@ const styles = StyleSheet.create({
 });
 
 export default ({ navigation }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [cars, setCars] = useState([]);
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      setIsLoading(true);
-      const { userId, token } = await UserStorage.retrieveUserIdAndToken();
+  const fetchCars = useCallback(async () => {
+    setIsLoading(true);
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-      CarService.getAllCarsByUserId(userId, token)
-        .then((userCars) => setCars(userCars))
-        .finally(() => setIsLoading(false));
-    };
-
-    fetchCars();
+    CarService.getAllCarsByUserId(userId)
+      .then((userCars) => setCars(userCars))
+      .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchCars();
+  }, [fetchCars]);
 
   return (
     <View style={styles.container}>
@@ -98,7 +100,18 @@ export default ({ navigation }) => {
         backgroundColor={colors.white}
       />
       <SafeAreaView style={styles.safeAreaContainer}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => {
+                setIsRefreshing(true);
+                fetchCars().finally(() => setIsRefreshing(false));
+              }}
+            />
+          }
+        >
           {cars.map((car) => {
             return (
               <View style={styles.card} key={car.id}>
@@ -168,14 +181,9 @@ export default ({ navigation }) => {
                               {
                                 text: "Delete",
                                 onPress: async () => {
-                                  const {
-                                    token,
-                                  } = await UserStorage.retrieveUserIdAndToken();
-                                  CarService.deleteCarById(car.id, token).then(
-                                    () => {
-                                      setCars(cars.filter((c) => c !== car));
-                                    }
-                                  );
+                                  CarService.deleteCarById(car.id).then(() => {
+                                    setCars(cars.filter((c) => c !== car));
+                                  });
                                 },
                               },
                               {

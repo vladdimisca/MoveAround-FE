@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
 export const CustomInput = ({
   icon,
   placeholder,
+  value,
   onTextChange,
   keyboardType = "default",
   autoCapitalize = "words",
@@ -45,10 +46,11 @@ export const CustomInput = ({
     <View style={styles.inputContainer}>
       <View style={styles.iconContainer}>{icon}</View>
       <TextInput
+        value={value}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         secureTextEntry={secureTextEntry}
-        onChangeText={(value) => onTextChange(value)}
+        onChangeText={onTextChange}
         style={styles.input}
         placeholder={placeholder}
       />

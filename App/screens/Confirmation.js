@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginHorizontal: 25,
     color: "red",
-    fontSize: 16,
+    fontSize: 14,
     alignSelf: "center",
   },
   actionText: {
@@ -167,11 +167,8 @@ export default ({ route, navigation }) => {
             setIsLoading(true);
 
             if (route.params.email) {
-              const {
-                token,
-                userId,
-              } = await UserStorage.retrieveUserIdAndToken();
-              await UserService.activateEmail(userId, token, value)
+              const { userId } = await UserStorage.retrieveUserIdAndToken();
+              await UserService.activateEmail(userId, value)
                 .then(() => {
                   navigation.dispatch(
                     CommonActions.reset({
@@ -219,11 +216,8 @@ export default ({ route, navigation }) => {
             }
             setIsLoading(true);
 
-            const {
-              token,
-              userId,
-            } = await UserStorage.retrieveUserIdAndToken();
-            await UserService.resendEmailCode(userId, token).finally(() =>
+            const { userId } = await UserStorage.retrieveUserIdAndToken();
+            await UserService.resendEmailCode(userId).finally(() =>
               setIsLoading(false)
             );
           }}
