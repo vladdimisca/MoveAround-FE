@@ -65,14 +65,27 @@ const changePassword = async (userId, oldPassword, newPassword) => {
 
 const activateEmail = async (userId, emailCode) => {
   return axiosInstance.post(
-    `${config.API_URL}users/${userId}/activation/email`,
+    `${config.API_URL}/users/${userId}/activation/email`,
     { emailCode }
   );
 };
 
 const resendEmailCode = async (userId) => {
   return axiosInstance.post(
-    `${config.API_URL}users/${userId}/activation/email/resend`
+    `${config.API_URL}/users/${userId}/activation/email/resend`
+  );
+};
+
+const activatePhoneNumber = async (userId, smsCode) => {
+  return axiosInstance.post(
+    `${config.API_URL}/users/${userId}/activation/phone`,
+    { smsCode }
+  );
+};
+
+const resendSmsCode = async (userId) => {
+  return axiosInstance.post(
+    `${config.API_URL}/users/${userId}/activation/phone/resend`
   );
 };
 
@@ -99,6 +112,8 @@ export const UserService = {
   changePassword,
   activateEmail,
   resendEmailCode,
+  activatePhoneNumber,
+  resendSmsCode,
   getAllUsers,
   getJoinStatistics,
 };

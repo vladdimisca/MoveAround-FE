@@ -96,6 +96,48 @@ export default ({ route, navigation }) => {
     setValue,
   });
 
+  const confirm = async (activate) => {
+    if (isLoading === true) {
+      return;
+    }
+    setIsLoading(true);
+
+    const { userId } = await UserStorage.retrieveUserIdAndToken();
+
+    await activate(userId, value)
+      .then(() => {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            key: null,
+            routes: [
+              {
+                name: "App",
+                state: {
+                  routes: [{ name: "Profile" }],
+                },
+              },
+            ],
+          })
+        );
+      })
+      .catch((err) => {
+        if (
+          err &&
+          err.response &&
+          err.response.request &&
+          err.response.request._response
+        ) {
+          setError(
+            `${JSON.parse(err.response.request._response).errorMessage}`
+          );
+        } else {
+          setError("Oops, something went wrong!");
+        }
+      })
+      .finally(() => setIsLoading(false));
+  };
+
   useEffect(() => {
     if (!route.params || (!route.params.email && !route.params.phone)) {
       navigation.dispatch(
@@ -135,6 +177,7 @@ export default ({ route, navigation }) => {
       />
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>{`Enter the code sent to\n${to}`}</Text>
+
         <CodeField
           ref={ref}
           {...props}
@@ -156,58 +199,22 @@ export default ({ route, navigation }) => {
             </View>
           )}
         />
+
         {isLoading === false && error !== "" && (
           <Text style={styles.errorText}>{error}</Text>
         )}
+
         <GeneralButton
           onPress={async () => {
-            if (isLoading === true) {
-              return;
-            }
-            setIsLoading(true);
-
             if (route.params.email) {
-              const { userId } = await UserStorage.retrieveUserIdAndToken();
-              await UserService.activateEmail(userId, value)
-                .then(() => {
-                  navigation.dispatch(
-                    CommonActions.reset({
-                      index: 0,
-                      key: null,
-                      routes: [
-                        {
-                          name: "App",
-                          state: {
-                            routes: [{ name: "Profile" }],
-                          },
-                        },
-                      ],
-                    })
-                  );
-                })
-                .catch((err) => {
-                  if (
-                    err &&
-                    err.response &&
-                    err.response.request &&
-                    err.response.request._response
-                  ) {
-                    setError(
-                      `${
-                        JSON.parse(err.response.request._response).errorMessage
-                      }`
-                    );
-                  } else {
-                    setError("Oops, something went wrong!");
-                  }
-                })
-                .finally(() => setIsLoading(false));
+              confirm(UserService.activateEmail);
             } else {
-              // send to route.params.phone
+              confirm(UserService.activatePhoneNumber);
             }
           }}
           text="Confirm"
         />
+
         <TouchableOpacity
           activeOpacity={0.6}
           onPress={async () => {
@@ -217,9 +224,12 @@ export default ({ route, navigation }) => {
             setIsLoading(true);
 
             const { userId } = await UserStorage.retrieveUserIdAndToken();
-            await UserService.resendEmailCode(userId).finally(() =>
-              setIsLoading(false)
-            );
+
+            const resend = route.params.email
+              ? UserService.resendEmailCode
+              : UserService.resendSmsCode;
+
+            await resend(userId).finally(() => setIsLoading(false));
           }}
         >
           <Text style={styles.actionText}>Resend code</Text>
