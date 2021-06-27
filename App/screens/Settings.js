@@ -276,7 +276,7 @@ export default ({ navigation }) => {
                 <Avatar.Accessory
                   size={34}
                   style={{ backgroundColor: colors.border }}
-                  onPress={() => updateProfilePicture()}
+                  onPress={updateProfilePicture}
                   activeOpacity={0.7}
                 />
               </Avatar>
@@ -395,22 +395,19 @@ export default ({ navigation }) => {
 
             <GeneralButton
               text="Save profile information"
-              onPress={() => updateUser()}
+              onPress={updateUser}
             />
 
             <View style={{ marginTop: 10, marginBottom: 20 }}>
               <ItemSeparator />
 
-              <TouchableOpacity onPress={() => signOut()} activeOpacity={0.6}>
+              <TouchableOpacity onPress={signOut} activeOpacity={0.6}>
                 <Text style={styles.actionText}>Sign out</Text>
               </TouchableOpacity>
 
               <ItemSeparator />
 
-              <TouchableOpacity
-                onPress={() => changePassword()}
-                activeOpacity={0.6}
-              >
+              <TouchableOpacity onPress={changePassword} activeOpacity={0.6}>
                 <Text style={styles.actionText}>Change password</Text>
               </TouchableOpacity>
 
