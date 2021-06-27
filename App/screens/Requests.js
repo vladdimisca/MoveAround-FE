@@ -55,7 +55,7 @@ export default ({ navigation }) => {
 
     const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-    await UserService.getUserById(userId).then((user) => setCurrentUser(user));
+    await UserService.getUserById(userId).then(setCurrentUser);
 
     action()
       .then((fetchedRequests) => {
@@ -76,7 +76,7 @@ export default ({ navigation }) => {
           })
         );
       })
-      .then((fetchedRequests) => setRequests(fetchedRequests))
+      .then(setRequests)
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -188,6 +188,7 @@ export default ({ navigation }) => {
                 const actionType = isDriver
                   ? RequestService.getReceivedRequests
                   : RequestService.getSentRequests;
+
                 getRequests(actionType, false).finally(() =>
                   setIsRefreshing(false)
                 );
@@ -232,6 +233,7 @@ export default ({ navigation }) => {
               />
             );
           })}
+
           {requests.length === 0 && (
             <Text style={styles.emptyListText}>
               You don&apos;t have any requests yet!

@@ -248,7 +248,7 @@ export default ({ route, navigation }) => {
             labelStyle={styles.labelStyle}
             inputContainerStyle={styles.inputContainerStyle}
             value={price}
-            onChangeText={(value) => setPrice(value)}
+            onChangeText={setPrice}
           />
 
           <Input
@@ -258,7 +258,7 @@ export default ({ route, navigation }) => {
             labelStyle={styles.labelStyle}
             inputContainerStyle={styles.inputContainerStyle}
             value={availableSeats}
-            onChangeText={(value) => setAvailableSeats(value)}
+            onChangeText={setAvailableSeats}
           />
 
           {isReqLoading === false && error !== "" && (

@@ -102,10 +102,12 @@ export default ({ route, navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={{ paddingBottom: 15 }}>
         <ScrollView>
           <ProfileItem
@@ -146,6 +148,7 @@ export default ({ route, navigation }) => {
             >
               <View style={styles.dateTextContainer}>
                 <Text style={styles.choose}>{formatDate("llll")}</Text>
+
                 <FontAwesome
                   style={{ marginRight: 15 }}
                   name="calendar"
@@ -153,6 +156,7 @@ export default ({ route, navigation }) => {
                   color={colors.lightText}
                 />
               </View>
+
               <View style={styles.line} />
             </TouchableOpacity>
           </View>

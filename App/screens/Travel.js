@@ -27,6 +27,7 @@ export default ({ navigation }) => {
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={styles.safeAreaContainer}>
         <TravelOption
           imageSource={require("../assets/images/driver.png")}
@@ -35,6 +36,7 @@ export default ({ navigation }) => {
           }
           text="Driver"
         />
+
         <TravelOption
           imageSource={require("../assets/images/passenger.png")}
           onPress={() =>

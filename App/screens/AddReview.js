@@ -126,16 +126,19 @@ export default ({ navigation, route }) => {
         }
         visible={fetchingReview}
       />
+
       <Spinner
         customIndicator={
           <DotIndicator color={colors.midBlue} count={3} size={12} />
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={styles.safeAreaContainer}>
         <ScrollView>
           <View style={styles.dropdown}>
@@ -193,7 +196,7 @@ export default ({ navigation, route }) => {
 
               response
                 .then(() => {
-                  // go back to receiver profile
+                  // go back to receiver's profile
                   navigation.pop(2);
                 })
                 .catch((err) => {

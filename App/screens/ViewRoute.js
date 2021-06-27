@@ -106,6 +106,7 @@ export default ({ route, navigation }) => {
     (async () => {
       setCurrentRoute(route.params.route);
       setIsLoading(true);
+
       const urlToFetchDistance = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${route.params.route.startLatitude},${route.params.route.startLongitude}&destinations=${route.params.route.stopLatitude}%2C${route.params.route.stopLongitude}&key=${config.API_KEY}`;
 
       fetch(urlToFetchDistance)
@@ -145,7 +146,7 @@ export default ({ route, navigation }) => {
                 })
               );
             })
-            .then((fetchedRoutes) => setWaypoints(fetchedRoutes))
+            .then(setWaypoints)
             .finally(() => setIsLoading(false));
         });
     })();

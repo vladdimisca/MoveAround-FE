@@ -154,6 +154,7 @@ export default ({ route, navigation }) => {
           ],
         })
       );
+
       return;
     }
     if (route.params.email) {

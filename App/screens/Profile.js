@@ -194,6 +194,7 @@ export default ({ navigation, route }) => {
     }
 
     const { userId } = await UserStorage.retrieveUserIdAndToken();
+
     await UserService.updateProfilePictureById(userId, result.base64)
       .then((response) => {
         setDisplayedUser((value) => {
@@ -213,6 +214,7 @@ export default ({ navigation, route }) => {
         barStyle="dark-content"
         backgroundColor={colors.offWhite}
       />
+
       {isProfileLoading ? (
         <View style={styles.dotIndicatorContainer}>
           <DotIndicator color={colors.midBlue} count={3} />
@@ -259,6 +261,7 @@ export default ({ navigation, route }) => {
                 <Text style={styles.headerText}>
                   {`${displayedUser.firstName} ${displayedUser.lastName}`}
                 </Text>
+
                 {displayedUser.role !== "ADMIN" ? (
                   <TouchableOpacity
                     onPress={() =>
@@ -425,17 +428,14 @@ export default ({ navigation, route }) => {
                   <View style={{ marginTop: 10, marginBottom: 20 }}>
                     <ItemSeparator />
 
-                    <TouchableOpacity
-                      onPress={() => signOut()}
-                      activeOpacity={0.6}
-                    >
+                    <TouchableOpacity onPress={signOut} activeOpacity={0.6}>
                       <Text style={styles.actionText}>Sign out</Text>
                     </TouchableOpacity>
 
                     <ItemSeparator />
 
                     <TouchableOpacity
-                      onPress={() => changePassword()}
+                      onPress={changePassword}
                       activeOpacity={0.6}
                     >
                       <Text style={styles.actionText}>Change password</Text>

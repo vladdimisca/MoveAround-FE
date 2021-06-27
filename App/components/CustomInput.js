@@ -45,6 +45,7 @@ export const CustomInput = ({
   return (
     <View style={styles.inputContainer}>
       <View style={styles.iconContainer}>{icon}</View>
+
       <TextInput
         value={value}
         keyboardType={keyboardType}

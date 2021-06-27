@@ -79,10 +79,12 @@ export default ({ route, navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           refreshControl={
@@ -164,6 +166,7 @@ export default ({ route, navigation }) => {
               />
             );
           })}
+
           {reviews.length === 0 && (
             <Text style={styles.emptyListText}>There is no review yet!</Text>
           )}
@@ -171,15 +174,16 @@ export default ({ route, navigation }) => {
           <View style={{ paddingBottom: 15 }} />
         </ScrollView>
 
-        {currentUser?.id !== route.params.userId && (
-          <GeneralButton
-            style={styles.reviewButton}
-            text="Leave a review"
-            onPress={() =>
-              navigation.push("AddReview", { userId: route.params.userId })
-            }
-          />
-        )}
+        {currentUser?.role !== "ADMIN" &&
+          currentUser?.id !== route.params.userId && (
+            <GeneralButton
+              style={styles.reviewButton}
+              text="Leave a review"
+              onPress={() =>
+                navigation.push("AddReview", { userId: route.params.userId })
+              }
+            />
+          )}
       </SafeAreaView>
     </View>
   );

@@ -124,17 +124,19 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Create an account</Text>
         <ScrollView>
           <View>
             <CustomInput
               keyboardType="numeric"
-              onTextChange={(phone) => setPhoneNumber(phone)}
+              onTextChange={setPhoneNumber}
               placeholder="Phone number..."
               icon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
@@ -153,26 +155,30 @@ export default ({ navigation }) => {
                 />
               }
             />
+
             <CustomInput
-              onTextChange={(fName) => setFirstName(fName)}
+              onTextChange={setFirstName}
               placeholder="First Name..."
               icon={<FontAwesome name="user-o" size={28} color={colors.text} />}
             />
+
             <CustomInput
-              onTextChange={(lName) => setLastName(lName)}
+              onTextChange={setLastName}
               placeholder="Last Name..."
               icon={<FontAwesome name="user-o" size={28} color={colors.text} />}
             />
+
             <CustomInput
               autoCapitalize="none"
-              onTextChange={(em) => setEmail(em)}
+              onTextChange={setEmail}
               placeholder="Email..."
               icon={<Fontisto name="email" size={28} color={colors.text} />}
             />
+
             <CustomInput
               autoCapitalize="none"
               secureTextEntry
-              onTextChange={(pass) => setPassword(pass)}
+              onTextChange={setPassword}
               placeholder="Password..."
               icon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
@@ -183,10 +189,11 @@ export default ({ navigation }) => {
                 />
               }
             />
+
             <CustomInput
               autoCapitalize="none"
               secureTextEntry
-              onTextChange={(pass) => setRepeatPass(pass)}
+              onTextChange={setRepeatPass}
               placeholder="Repeat Password..."
               icon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
@@ -200,6 +207,7 @@ export default ({ navigation }) => {
           </View>
           <View style={styles.bottomTextContainer}>
             <Text style={styles.bottomText}>Already have an account?</Text>
+
             <TouchableOpacity
               style={styles.bottomLinkContainer}
               onPress={() => navigation.push("Login")}
@@ -207,9 +215,11 @@ export default ({ navigation }) => {
               <Text style={styles.bottomLinkText}>Sign in</Text>
             </TouchableOpacity>
           </View>
+
           {isLoading === false && error !== "" && (
             <Text style={styles.errorText}>{error}</Text>
           )}
+
           <NextButton onPress={() => signUp()} />
         </ScrollView>
       </SafeAreaView>

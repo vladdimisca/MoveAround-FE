@@ -417,6 +417,16 @@ const UsersStackScreen = () => (
       component={DeleteAccount}
       options={emptyHeaderOptions}
     />
+    <UsersStack.Screen
+      name="Profile"
+      component={Profile}
+      options={{ headerShown: false }}
+    />
+    <TravelStack.Screen
+      name="Reviews"
+      component={Reviews}
+      options={{ ...headerOptions, title: "Reviews" }}
+    />
   </UsersStack.Navigator>
 );
 

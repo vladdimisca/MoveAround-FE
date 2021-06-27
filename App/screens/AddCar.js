@@ -113,12 +113,14 @@ export default ({ navigation, route }) => {
         }
         visible={fetchingCar}
       />
+
       <Spinner
         customIndicator={
           <DotIndicator color={colors.midBlue} count={3} size={12} />
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}

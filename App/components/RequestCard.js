@@ -100,8 +100,10 @@ export const RequestCard = ({
                 : require("../assets/images/profile-placeholder.png")
             }
           />
+
           <Text style={styles.text}>{request.user.firstName}</Text>
         </TouchableOpacity>
+
         {showMenu && (
           <Menu>
             <MenuTrigger>
@@ -112,6 +114,7 @@ export const RequestCard = ({
                 style={{ alignSelf: "center" }}
               />
             </MenuTrigger>
+
             <MenuOptions>
               <TouchableOpacity activeOpacity={0.7}>
                 {showDelete && (
@@ -159,14 +162,17 @@ export const RequestCard = ({
           <Text style={styles.innerText}>From: </Text>
           <Text style={styles.detailText}>{`${request.startAddress}`}</Text>
         </View>
+
         <View style={styles.detailContainer}>
           <Text style={styles.innerText}>To: </Text>
           <Text style={styles.detailText}>{`${request.stopAddress}`}</Text>
         </View>
+
         <View style={styles.detailContainer}>
           <Text style={styles.innerText}>Distance: </Text>
           <Text style={styles.detailText}>{`${request.distance}`}</Text>
         </View>
+
         <View style={styles.detailContainer}>
           <Text style={styles.innerText}>Status: </Text>
           <Text style={styles.detailText}>

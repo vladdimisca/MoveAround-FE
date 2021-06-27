@@ -50,11 +50,13 @@ export default ({ navigation }) => {
             ],
           })
         );
+
         return;
       }
 
       // clear the storage
       await UserStorage.clearStorage();
+
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -76,7 +78,7 @@ export default ({ navigation }) => {
         style={styles.container}
         colors={[colors.midBlue, colors.darkBlue]}
       >
-        <Text style={styles.text}> MoveAround </Text>
+        <Text style={styles.text}> Move Around </Text>
       </LinearGradient>
     </>
   );

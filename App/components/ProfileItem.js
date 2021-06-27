@@ -28,6 +28,7 @@ export const ProfileItem = ({ leftIcon, rightIcon, text, onPress, active }) => {
   return (
     <View style={styles.container}>
       {leftIcon}
+
       <TouchableOpacity activeOpacity={active ? 0.7 : 1}>
         <Text
           onPress={onPress}

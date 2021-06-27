@@ -88,6 +88,7 @@ export const UserCard = ({ user, onPress, onDelete }) => {
         <Text style={styles.nameText}>
           {`${user?.firstName} ${user?.lastName}`}
         </Text>
+
         <Text style={styles.description}>
           {user?.description.length > 22
             ? `${user?.description.substring(0, 22)}...`
@@ -104,6 +105,7 @@ export const UserCard = ({ user, onPress, onDelete }) => {
             style={{ marginRight: 8 }}
           />
         </MenuTrigger>
+
         <MenuOptions>
           <TouchableOpacity activeOpacity={0.7}>
             <MenuOption onSelect={onDelete}>

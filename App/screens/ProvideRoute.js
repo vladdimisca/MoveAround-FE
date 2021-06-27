@@ -236,6 +236,7 @@ export default ({ navigation, route }) => {
                   stopLocation.longitude,
                   () => {
                     setStartLocation({ latitude, longitude });
+
                     Geocoder.from({ latitude, longitude }).then((json) => {
                       startRef.current?.setAddressText(
                         json.results[0].formatted_address
@@ -245,6 +246,7 @@ export default ({ navigation, route }) => {
                 );
               } else {
                 setStartLocation({ latitude, longitude });
+
                 Geocoder.from({ latitude, longitude }).then((json) => {
                   startRef.current?.setAddressText(
                     json.results[0].formatted_address

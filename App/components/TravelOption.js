@@ -61,6 +61,7 @@ export const TravelOption = ({
         colors={[colors.lightBlue, colors.midBlue, colors.darkBlue]}
       >
         <Image source={imageSource} style={styles.image} resizeMode="contain" />
+
         <Text style={styles.text}>{text}</Text>
       </LinearGradient>
     </TouchableOpacity>

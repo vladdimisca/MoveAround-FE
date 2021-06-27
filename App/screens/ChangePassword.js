@@ -90,7 +90,7 @@ export default ({ navigation }) => {
             inputContainerStyle={styles.inputContainerStyle}
             leftIconContainerStyle={styles.leftIconContainerStyle}
             value={newPassword}
-            onChangeText={(pass) => setNewPassword(pass)}
+            onChangeText={setNewPassword}
             autoCapitalize="none"
           />
 
@@ -107,7 +107,7 @@ export default ({ navigation }) => {
             inputContainerStyle={styles.inputContainerStyle}
             leftIconContainerStyle={styles.leftIconContainerStyle}
             value={repeatNewPassword}
-            onChangeText={(pass) => setRepeatNewPassword(pass)}
+            onChangeText={setRepeatNewPassword}
             autoCapitalize="none"
           />
 

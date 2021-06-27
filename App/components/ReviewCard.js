@@ -118,6 +118,7 @@ export const ReviewCard = ({
                 : require("../assets/images/profile-placeholder.png")
             }
           />
+
           <Text style={styles.text}>{review.sender.firstName}</Text>
         </TouchableOpacity>
 

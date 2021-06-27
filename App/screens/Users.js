@@ -72,10 +72,12 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={styles.container}>
         <CustomInput
           value={searchText}
@@ -86,12 +88,16 @@ export default ({ navigation }) => {
             setDisplayedUsers(
               users.filter((user) => {
                 const fullName = `${user.firstName} ${user.lastName}`;
-                
+
                 if (value === "") {
                   return false;
                 }
 
-                if (fullName.toLocaleLowerCase().includes(value.toLocaleLowerCase())) {
+                if (
+                  fullName
+                    .toLocaleLowerCase()
+                    .includes(value.toLocaleLowerCase())
+                ) {
                   return true;
                 }
 
@@ -106,7 +112,7 @@ export default ({ navigation }) => {
             <UserCard
               key={user.id}
               user={user}
-              onPress={() => console.log("Works!")}
+              onPress={() => navigation.push("Profile", { userId: user.id })}
               onDelete={() =>
                 navigation.push("DeleteAccount", { userId: user.id })
               }

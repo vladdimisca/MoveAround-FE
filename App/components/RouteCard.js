@@ -105,6 +105,7 @@ export const RouteCard = ({
                 : require("../assets/images/profile-placeholder.png")
             }
           />
+
           <Text style={styles.text}>{route.user.firstName}</Text>
         </TouchableOpacity>
 
@@ -148,14 +149,17 @@ export const RouteCard = ({
           <Text style={styles.innerText}>From: </Text>
           <Text style={styles.detailText}>{`${route.startAddress}`}</Text>
         </View>
+
         <View style={styles.detailContainer}>
           <Text style={styles.innerText}>To: </Text>
           <Text style={styles.detailText}>{`${route.stopAddress}`}</Text>
         </View>
+
         <View style={styles.detailContainer}>
           <Text style={styles.innerText}>
             {`${route.parentRoute ? "Price: " : "Date: "}`}
           </Text>
+
           <Text style={styles.detailText}>
             {`${
               route.parentRoute

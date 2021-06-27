@@ -86,8 +86,10 @@ export default ({ navigation }) => {
         callingCode,
         password
       );
+
       await UserStorage.saveUserIdAndToken(token, user.id).then(() => {
         setIsLoading(false);
+
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
@@ -114,6 +116,7 @@ export default ({ navigation }) => {
       } else {
         setError("Oops, something went wrong!");
       }
+
       setIsLoading(false);
     }
   };
@@ -126,10 +129,12 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Sign in to your account</Text>
         <ScrollView>
@@ -137,7 +142,7 @@ export default ({ navigation }) => {
             <CustomInput
               keyboardType="numeric"
               placeholder="Phone number..."
-              onTextChange={(phone) => setPhoneNumber(phone)}
+              onTextChange={setPhoneNumber}
               icon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
                 <CountryPicker
@@ -155,11 +160,12 @@ export default ({ navigation }) => {
                 />
               }
             />
+
             <CustomInput
               autoCapitalize="none"
               secureTextEntry
               placeholder="Password..."
-              onTextChange={(pass) => setPassword(pass)}
+              onTextChange={setPassword}
               icon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
                 <MaterialCommunityIcons
@@ -189,10 +195,12 @@ export default ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
+
           {isLoading === false && error !== "" && (
             <Text style={styles.errorText}>{error}</Text>
           )}
-          <NextButton onPress={() => login()} />
+
+          <NextButton onPress={login} />
         </ScrollView>
       </SafeAreaView>
     </View>

@@ -68,6 +68,7 @@ export default ({ navigation }) => {
         return Promise.all(
           fetchedRoutes.map(async (route) => {
             let currentRoute = route;
+
             if (route.parentRoute) {
               currentRoute = route.parentRoute;
             }
@@ -90,7 +91,7 @@ export default ({ navigation }) => {
           })
         );
       })
-      .then((fetchedRoutes) => setRoutes(fetchedRoutes))
+      .then(setRoutes)
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -107,10 +108,12 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={{ flex: 1 }}>
         <View
           style={{
@@ -239,6 +242,7 @@ export default ({ navigation }) => {
               />
             );
           })}
+
           {routes.length === 0 && (
             <Text style={styles.emptyListText}>
               You don&apos;t have any routes yet!

@@ -57,7 +57,7 @@ export default () => {
     setIsLoading(true);
 
     await UserService.recoverAccount(email)
-      .then((response) => setSuccess(response))
+      .then(setSuccess)
       .catch((err) => {
         if (
           err &&
@@ -89,27 +89,31 @@ export default () => {
       />
       <SafeAreaView style={styles.container}>
         <Text style={styles.text}>Recover your account</Text>
+
         <ScrollView>
           <View>
             <CustomInput
               autoCapitalize="none"
               placeholder="Enter your email..."
-              onTextChange={(em) => setEmail(em)}
+              onTextChange={setEmail}
               icon={<Fontisto name="email" size={28} color={colors.text} />}
             />
+
             {isLoading === false && error !== "" && success === "" && (
               <Text style={{ ...styles.responseText, color: "red" }}>
                 {error}
               </Text>
             )}
+
             {isLoading === false && error === "" && success !== "" && (
               <Text style={{ ...styles.responseText, color: "green" }}>
                 {success}
               </Text>
             )}
+
             <GeneralButton
               text="Send a new password"
-              onPress={() => recoverAccount()}
+              onPress={recoverAccount}
             />
           </View>
         </ScrollView>

@@ -79,7 +79,7 @@ export default ({ navigation }) => {
     const { userId } = await UserStorage.retrieveUserIdAndToken();
 
     CarService.getAllCarsByUserId(userId)
-      .then((userCars) => setCars(userCars))
+      .then(setCars)
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -95,10 +95,12 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       <SafeAreaView style={styles.safeAreaContainer}>
         <ScrollView
           refreshControl={

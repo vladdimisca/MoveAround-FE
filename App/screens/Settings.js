@@ -167,11 +167,13 @@ export default ({ navigation }) => {
     }
 
     const { userId } = await UserStorage.retrieveUserIdAndToken();
+
     await UserService.updateProfilePictureById(userId, result.base64)
       .then((response) => {
         setUser((value) => {
           return { ...value, profilePictureURL: response.profilePictureURL };
         });
+
         redirectToProfile();
       })
       .finally(() => setIsLoading(false));
@@ -235,10 +237,12 @@ export default ({ navigation }) => {
         }
         visible={isLoading}
       />
+
       <FocusAwareStatusBar
         barStyle="dark-content"
         backgroundColor={colors.white}
       />
+
       {isScreenLoading ? (
         <View style={styles.dotIndicatorContainer}>
           <DotIndicator color={colors.midBlue} count={3} />
@@ -293,6 +297,7 @@ export default ({ navigation }) => {
                 })
               }
             />
+
             <Input
               leftIcon={
                 <Icon name="user" size={24} color={colors.darkBorder} />
@@ -308,6 +313,7 @@ export default ({ navigation }) => {
                 })
               }
             />
+
             <Input
               leftIcon={
                 // eslint-disable-next-line react/jsx-wrap-multilines
@@ -330,6 +336,7 @@ export default ({ navigation }) => {
                 })
               }
             />
+
             <Input
               autoCapitalize="none"
               leftIcon={
@@ -346,6 +353,7 @@ export default ({ navigation }) => {
                 })
               }
             />
+
             <Input
               autoCapitalize="none"
               leftIcon={
@@ -380,9 +388,11 @@ export default ({ navigation }) => {
                 })
               }
             />
+
             {isLoading === false && profileUpdateError !== "" && (
               <Text style={styles.errorText}>{profileUpdateError}</Text>
             )}
+
             <GeneralButton
               text="Save profile information"
               onPress={() => updateUser()}

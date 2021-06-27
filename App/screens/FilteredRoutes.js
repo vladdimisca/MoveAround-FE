@@ -72,11 +72,13 @@ export default ({ route, navigation }) => {
         if (startStart >= stopStart) {
           return false;
         }
+
         const startStop = await computeRoadDistance(wpStart, routeStop);
         const stopStop = await computeRoadDistance(wpStop, routeStop);
         if (stopStop >= startStop) {
           return false;
         }
+
         return true;
       };
 
@@ -112,6 +114,7 @@ export default ({ route, navigation }) => {
             return true;
           }
         }
+
         return false;
       };
 
@@ -121,9 +124,7 @@ export default ({ route, navigation }) => {
 
       const { userId } = await UserStorage.retrieveUserIdAndToken();
 
-      await UserService.getUserById(userId).then((user) =>
-        setCurrentUser(user)
-      );
+      await UserService.getUserById(userId).then(setCurrentUser);
 
       const subRoute = {
         startLatitude: route.params.startLocation.latitude,
@@ -281,6 +282,7 @@ export default ({ route, navigation }) => {
                             .errorMessage
                         }`;
                       }
+
                       Alert.alert(
                         "The request was not registered!",
                         alertMessage,
@@ -297,6 +299,7 @@ export default ({ route, navigation }) => {
               />
             );
           })}
+
           {routes.length === 0 && (
             <Text style={styles.emptyListText}>
               There isn&apos;t any matching route!
